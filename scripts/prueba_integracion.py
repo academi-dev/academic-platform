@@ -222,12 +222,98 @@ def main() -> int:
             verificar("Respuesta menciona O(log n)", "log n" in (data.get("respuesta", "") + str(citas)), data.get("respuesta", "")[:200])
             print(f"\n  Respuesta RAG: {data.get('respuesta', '')[:220]}...")
 
+        # ------------------------------------------------------------------ 6B
+        seccion("7. Integración de academic-bot y academic-mobile con API + RAG en vivo")
+        try:
+            import asyncio
+            from pathlib import Path as _Path
+
+            raiz_proyectos = _Path(__file__).resolve().parents[3]
+            bot_dir = raiz_proyectos / "proyecto 2" / "academic-bot"
+            mobile_service = (
+                raiz_proyectos
+                / "proyecto 3"
+                / "academic-mobile"
+                / "app"
+                / "src"
+                / "main"
+                / "java"
+                / "com"
+                / "academic"
+                / "mobile"
+                / "data"
+                / "api"
+                / "AcademicApiService.kt"
+            )
+            if str(bot_dir) not in sys.path:
+                sys.path.insert(0, str(bot_dir))
+
+            from bot.services.api_client import AcademicApiClient
+            from bot.services.rag_client import AcademicRagClient
+            from bot.utils.formatters import (
+                format_materias,
+                format_rag_response,
+                format_tareas,
+            )
+
+            bot_api = AcademicApiClient(base_url=f"{api}/api/v1")
+            bot_rag = AcademicRagClient(base_url=f"{rag}/api/v1")
+
+            async def _flujo_bot():
+                tok_resp = await bot_api.login(email=email, password=password)
+                tok = tok_resp["access_token"]
+                mats = await bot_api.get_materias(token=tok)
+                tars = await bot_api.get_tareas(token=tok, materia_id=materia_id)
+                ans = await bot_rag.ask_question(
+                    query="¿Cuáles son los pilares de la Programación Orientada a Objetos?",
+                    token=tok,
+                )
+                return mats, tars, ans
+
+            mats_bot, tars_bot, ans_bot = asyncio.run(_flujo_bot())
+            verificar(
+                "academic-bot autentica y lista materias desde academic-api",
+                len(mats_bot) == 1 and mats_bot[0]["id"] == materia_id,
+            )
+            verificar(
+                "academic-bot lista tareas desde academic-api",
+                len(tars_bot) == 1 and tars_bot[0]["id"] == tarea_id,
+            )
+            msg_rag = format_rag_response(ans_bot, "¿Cuáles son los pilares de la POO?")
+            verificar(
+                "academic-bot consulta academic-rag y formatea respuesta con citas para Telegram",
+                "encapsulamiento" in msg_rag.lower() and "Pág. 1" in msg_rag,
+                msg_rag[:200],
+            )
+            msg_mats = format_materias(mats_bot)
+            msg_tars = format_tareas(tars_bot)
+            verificar(
+                "academic-bot formatea mensajes de /materias y /tareas",
+                "Estructuras de Datos" in msg_mats and "Implementar árbol AVL" in msg_tars,
+            )
+
+            if mobile_service.exists():
+                kt_code = mobile_service.read_text(encoding="utf-8")
+                rutas_esperadas = [
+                    "api/v1/auth/login",
+                    "api/v1/auth/registro",
+                    "api/v1/auth/refresh",
+                    "api/v1/materias",
+                    "api/v1/tareas",
+                ]
+                verificar(
+                    "academic-mobile (Retrofit) coincide con todos los endpoints de academic-api",
+                    all(ruta in kt_code for ruta in rutas_esperadas),
+                )
+        except Exception as exc_bot:
+            verificar("Integración de academic-bot y academic-mobile", False, str(exc_bot))
+
         if doc_id:
             r = c.delete(f"{rag}/api/v1/documentos/{doc_id}")
             verificar("Eliminar documento devuelve 204", r.status_code == 204, str(r.status_code))
 
-    # ------------------------------------------------------------------ 7
-    seccion("7. Limpieza")
+    # ------------------------------------------------------------------ 8
+    seccion("8. Limpieza")
     r = c.delete(f"{api}/api/v1/tareas/{tarea_id}", headers=h)
     verificar("Eliminar tarea devuelve 204", r.status_code == 204, str(r.status_code))
     r = c.delete(f"{api}/api/v1/materias/{materia_id}", headers=h)
