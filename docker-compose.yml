@@ -1,0 +1,165 @@
+# ==============================================================================
+# Academic Platform — Orquestador de Servicios (Docker Compose)
+# Organización: academic-dev
+# Equipo:
+#   - Jean Mena (@hilton45)
+#   - Eyfer Mena (@Eyfer3174)
+# ==============================================================================
+# Este archivo orquesta los microservicios del ecosistema Academic:
+#   1. postgres: Base de datos relacional PostgreSQL 16 para academic-api
+#   2. academic-api: API REST FastAPI con autenticación JWT, materias, tareas, etc.
+#   3. academic-rag: Servicio de Inteligencia Artificial y Retrieval-Augmented Generation con ChromaDB
+#   4. academic-bot: Bot conversacional de Telegram para interacción de estudiantes
+#   5. nginx: Gateway / Reverse Proxy unificado para enrutar tráfico web y móvil
+# ==============================================================================
+
+version: "3.9"
+
+services:
+  # ----------------------------------------------------------------------------
+  # Servicio 1: Base de Datos Relacional PostgreSQL 16
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: academic-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-academic_db}
+      POSTGRES_USER: ${POSTGRES_USER:-academic_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-in-production}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - academic-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-academic_user} -d ${POSTGRES_DB:-academic_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ----------------------------------------------------------------------------
+  # Servicio 2: API REST Principal (academic-api)
+  # ----------------------------------------------------------------------------
+  academic-api:
+    build:
+      context: ../../proyecto 1/academic-api
+      dockerfile: Dockerfile
+    image: academic-api:latest
+    container_name: academic-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # academic-api usa SQLAlchemy síncrono con psycopg2
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-academic_user}:${POSTGRES_PASSWORD:-change-me-in-production}@postgres:5432/${POSTGRES_DB:-academic_db}
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS:-7}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    networks:
+      - academic-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # ----------------------------------------------------------------------------
+  # Servicio 3: Servicio de IA y RAG (academic-rag)
+  # ----------------------------------------------------------------------------
+  academic-rag:
+    build:
+      context: ../../proyecto 5/academic-rag
+      dockerfile: Dockerfile
+    image: academic-rag:latest
+    container_name: academic-rag
+    restart: unless-stopped
+    environment:
+      # Nombres de variables tal como los lee app/config.py de academic-rag
+      CHROMA_PERSIST_DIR: /app/chroma_db
+      UPLOAD_DIR: /app/uploads
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-all-MiniLM-L6-v2}
+      LLM_PROVIDER: ${LLM_PROVIDER:-local}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    volumes:
+      - chroma-data:/app/chroma_db
+    ports:
+      # El contenedor escucha en 8000 (ver Dockerfile); se publica en el host como 8001
+      - "${RAG_PORT:-8001}:8000"
+    networks:
+      - academic-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # ----------------------------------------------------------------------------
+  # Servicio 4: Bot de Telegram (academic-bot)
+  # ----------------------------------------------------------------------------
+  academic-bot:
+    build:
+      context: ../../proyecto 2/academic-bot
+      dockerfile: Dockerfile
+    image: academic-bot:latest
+    container_name: academic-bot
+    restart: unless-stopped
+    depends_on:
+      academic-api:
+        condition: service_healthy
+      academic-rag:
+        condition: service_started
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      # Nombres de variables tal como los lee bot/config.py (incluyen /api/v1)
+      API_BASE_URL: http://academic-api:8000/api/v1
+      RAG_BASE_URL: http://academic-rag:8000/api/v1
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    networks:
+      - academic-net
+
+  # ----------------------------------------------------------------------------
+  # Servicio 5: Gateway / Reverse Proxy (Nginx)
+  # ----------------------------------------------------------------------------
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: academic-gateway
+    restart: unless-stopped
+    ports:
+      - "${GATEWAY_PORT:-80}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      academic-api:
+        condition: service_healthy
+      academic-rag:
+        condition: service_started
+    networks:
+      - academic-net
+
+# ------------------------------------------------------------------------------
+# Redes Compartidas
+# ------------------------------------------------------------------------------
+networks:
+  academic-net:
+    name: academic-net
+    driver: bridge
+
+# ------------------------------------------------------------------------------
+# Volúmenes Persistentes
+# ------------------------------------------------------------------------------
+volumes:
+  postgres-data:
+    name: academic_postgres_data
+  chroma-data:
+    name: academic_chroma_data
