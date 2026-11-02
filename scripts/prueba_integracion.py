@@ -255,11 +255,11 @@ def main() -> int:
                 format_rag_response,
                 format_tareas,
             )
-            from bot.whatsapp.processor import WhatsAppMessageProcessor
+            from bot.whatsapp.processor import WhatsAppCommandProcessor
 
             bot_api = AcademicApiClient(base_url=f"{api}/api/v1")
             bot_rag = AcademicRagClient(base_url=f"{rag}/api/v1")
-            wsp_proc = WhatsAppMessageProcessor(api_client=bot_api, rag_client=bot_rag)
+            wsp_proc = WhatsAppCommandProcessor(api=bot_api, rag=bot_rag)
 
             async def _flujo_bot():
                 tok_resp = await bot_api.login(email=email, password=password)
@@ -272,15 +272,15 @@ def main() -> int:
                 )
                 # Flujo completo de WhatsApp QR (conversación multi-paso + filtro personal)
                 jid = "573001234567@s.whatsapp.net"
-                wsp_personal = await wsp_proc.process_message(jid, "Hola bro, nos vemos en la U")
-                await wsp_proc.process_message(jid, "/login")
-                await wsp_proc.process_message(jid, email)
-                wsp_login = await wsp_proc.process_message(jid, password)
-                wsp_mats = await wsp_proc.process_message(jid, "/materias")
-                wsp_rag = await wsp_proc.process_message(
+                wsp_personal = await wsp_proc.handle_message(jid, "Hola bro, nos vemos en la U")
+                await wsp_proc.handle_message(jid, "/login")
+                await wsp_proc.handle_message(jid, email)
+                wsp_login = await wsp_proc.handle_message(jid, password)
+                wsp_mats = await wsp_proc.handle_message(jid, "/materias")
+                wsp_rag = await wsp_proc.handle_message(
                     jid, "/preguntar ¿Qué complejidad tiene la búsqueda binaria?"
                 )
-                wsp_rem = await wsp_proc.process_message(
+                wsp_rem = await wsp_proc.handle_message(
                     jid, "/recordar 15m Sustentar proyecto Academic"
                 )
                 return mats, tars, ans, wsp_personal, wsp_login, wsp_mats, wsp_rag, wsp_rem
@@ -317,13 +317,13 @@ def main() -> int:
             )
             verificar(
                 "WhatsApp QR ignora mensajes personales sin comando ('/...')",
-                wsp_personal.get("reply") is None,
+                not wsp_personal.get("reply"),
                 str(wsp_personal),
             )
             verificar(
                 "WhatsApp QR completa login conversacional contra academic-api",
-                "exitoso" in (wsp_login.get("reply") or "").lower()
-                or "bienvenido" in (wsp_login.get("reply") or "").lower(),
+                "éxito" in (wsp_login.get("reply") or "").lower()
+                or "vinculada" in (wsp_login.get("reply") or "").lower(),
                 str(wsp_login)[:200],
             )
             verificar(
