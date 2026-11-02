@@ -3,7 +3,7 @@
 > **Organización:** `academic-dev`  
 > **Equipo de Desarrollo:**  
 > - Jean Mena ([@hilton45](https://github.com/hilton45))  
-> - Eyfer Mena ([@Eyfer3174](https://github.com/Eyfer3174))  
+> - Eyfer Mena ([@eyfer3174-commits](https://github.com/eyfer3174-commits-commits))  
 > **Versión:** 1.0.0 — Octubre 2026  
 
 ---

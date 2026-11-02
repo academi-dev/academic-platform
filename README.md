@@ -29,10 +29,10 @@ El ecosistema **Academic** está organizado en microservicios modulares e indepe
 | Componente | Repositorio | Tecnología | Rol en la Plataforma |
 | :--- | :--- | :--- | :--- |
 | **Orquestador** | `academic-platform` | Docker Compose / Nginx | Orquestación de contenedores, redes y proxy unificado |
-| **API Principal** | [`academic-api`](https://github.com/academic-dev/academic-api) | FastAPI, SQLAlchemy Async, Alembic | Lógica de negocio, CRUD materias/tareas, autenticación JWT |
-| **Motor RAG** | [`academic-rag`](https://github.com/academic-dev/academic-rag) | FastAPI, ChromaDB, LangChain | Búsqueda semántica y asistencia con IA sobre reglamentos |
-| **Bot Estudiantes**| [`academic-bot`](https://github.com/academic-dev/academic-bot) | `python-telegram-bot` | Asistente conversacional de Telegram para alumnos |
-| **App Móvil** | [`academic-mobile`](https://github.com/academic-dev/academic-mobile)| Android / Kotlin / Jetpack Compose | Aplicación móvil nativa para estudiantes |
+| **API Principal** | [`academic-api`](https://github.com/academi-dev/academic-api) | FastAPI, SQLAlchemy Async, Alembic | Lógica de negocio, CRUD materias/tareas, autenticación JWT |
+| **Motor RAG** | [`academic-rag`](https://github.com/academi-dev/academic-rag) | FastAPI, ChromaDB, LangChain | Búsqueda semántica y asistencia con IA sobre reglamentos |
+| **Bot Estudiantes**| [`academic-bot`](https://github.com/academi-dev/academic-bot) | `python-telegram-bot` | Asistente conversacional de Telegram para alumnos |
+| **App Móvil** | [`academic-mobile`](https://github.com/academi-dev/academic-mobile)| Android / Kotlin / Jetpack Compose | Aplicación móvil nativa para estudiantes |
 
 ---
 
@@ -201,7 +201,7 @@ academic-platform/
 
 Desarrollado con dedicación por el equipo de **`academic-dev`**:
 - **Jean Mena** — [@hilton45](https://github.com/hilton45)
-- **Eyfer Mena** — [@Eyfer3174](https://github.com/Eyfer3174)
+- **Eyfer Mena** — [@eyfer3174-commits](https://github.com/eyfer3174-commits-commits)
 
 ---
 
