@@ -201,7 +201,7 @@ academic-platform/
 
 Desarrollado con dedicación por el equipo de **`academic-dev`**:
 - **Jean Mena** — [@hilton45](https://github.com/hilton45)
-- **Eyfer Mena** — [@eyfer3174-commits](https://github.com/eyfer3174-commits-commits)
+- **Eyfer Mena** — [@eyfer3174-commits](https://github.com/eyfer3174-commits)
 
 ---
 

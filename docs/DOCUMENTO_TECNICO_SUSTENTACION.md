@@ -1,7 +1,7 @@
 # 🎓 Documento Técnico de Arquitectura e Ingeniería de Software — Ecosistema *Academic*
 
 **Organización:** [`academi-dev`](https://github.com/academi-dev)  
-**Autores:** Jean Mena (`@hilton45`) · Eyfer Mena (`@eyfer3174-commits-commits`)  
+**Autores:** Jean Mena (`@hilton45`) · Eyfer Mena (`@eyfer3174-commits`)  
 **Arquitectura:** Microservicios Distribuidos API-First, Inteligencia Artificial Generativa/Extractiva (RAG), Mensajería Omnicanal (WhatsApp QR + Telegram) y Cliente Móvil Nativo Android (MVVM).
 
 ---

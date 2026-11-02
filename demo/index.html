@@ -19,12 +19,12 @@
           org: academi-dev · 5 Repositorios Sincronizados
         </span>
         <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
-          ● 64 Unit Tests + 37/37 E2E OK
+          ● 70 Unit Tests + 41/41 E2E OK
         </span>
       </div>
       <h1 class="text-xl font-bold mt-2">Academic — Demostración Interactiva de los 5 Proyectos Unidos</h1>
       <p class="text-sm text-[var(--muted-foreground)] mt-1">
-        Todo lo que hagas en el celular Android se refleja al instante en el Bot de Telegram, en el asistente RAG y en el inspector de peticiones HTTP de la API.
+        Todo lo que hagas en el celular Android se refleja al instante en WhatsApp QR, en el Bot de Telegram, en el asistente RAG y en el inspector HTTP de la API.
       </p>
     </div>
 
@@ -54,9 +54,9 @@
     </div>
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 flex items-center justify-between">
       <div>
-        <div class="text-xs text-[var(--muted-foreground)]">Proyecto 2 · Telegram</div>
+        <div class="text-xs text-[var(--muted-foreground)]">Proyecto 2 · WhatsApp + Telegram</div>
         <div class="text-sm font-semibold">academic-bot</div>
-        <div class="text-xs text-emerald-500 font-medium">Polling + Scheduler</div>
+        <div class="text-xs text-emerald-500 font-medium">QR Baileys :3005 + Polling</div>
       </div>
       <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
     </div>
@@ -141,24 +141,51 @@
     <!-- COLUMNA DERECHA: BOT DE TELEGRAM + INSPECTOR HTTP EN VIVO -->
     <div class="xl:col-span-7 space-y-5">
 
-      <!-- SIMULADOR DE TELEGRAM (academic-bot) -->
+      <!-- SIMULADOR OMNICANAL WHATSAPP QR + TELEGRAM (academic-bot) -->
       <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[var(--border)]">
           <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-full bg-[var(--primary)] text-[var(--primary-foreground)] flex items-center justify-center font-bold text-sm">
-              🤖
+            <div id="bot-avatar" class="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">
+              📱
             </div>
             <div>
-              <div class="text-sm font-bold">Academic Bot (@AcademicUcpBot)</div>
-              <div class="text-xs text-emerald-500">En línea · Conectado a academic-api (:8000) y academic-rag (:8001)</div>
+              <div id="bot-title" class="text-sm font-bold">WhatsApp QR Bridge (+57 300 123 4567)</div>
+              <div id="bot-subtitle" class="text-xs text-emerald-500">Vinculado vía Baileys (:3005) · Filtro inteligente de chats personales activo</div>
             </div>
           </div>
-          <button onclick="clearBotChat()" class="px-2.5 py-1 rounded-lg text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
-            Limpiar chat
-          </button>
+          <div class="flex items-center gap-1.5">
+            <button onclick="setBotChannel('whatsapp')" id="btn-chan-whatsapp" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white">
+              🟢 WhatsApp QR
+            </button>
+            <button onclick="setBotChannel('telegram')" id="btn-chan-telegram" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
+              🔵 Telegram
+            </button>
+            <button onclick="toggleQrModal()" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
+              📷 QR :3005
+            </button>
+            <button onclick="clearBotChat()" class="px-2.5 py-1 rounded-lg text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
+              Limpiar
+            </button>
+          </div>
         </div>
 
-        <!-- Botones rápidos de comandos de Telegram -->
+        <!-- Panel colapsable de vinculación por Código QR (WhatsApp Web Bridge) -->
+        <div id="wsp-qr-drawer" class="hidden my-3 p-3 rounded-xl bg-[var(--background)] border border-emerald-500/40 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="space-y-1 text-xs">
+            <div class="font-bold text-emerald-500">📱 Vinculación en Vivo por Código QR (@whiskeysockets/baileys)</div>
+            <div class="text-[var(--muted-foreground)]">
+              Ejecuta <code>.\iniciar_whatsapp.ps1</code> en <code>proyecto 2\academic-bot</code> o abre <a href="http://localhost:3005" target="_blank" class="underline text-[var(--primary)] font-semibold">http://localhost:3005</a> para escanear el QR desde <strong>WhatsApp → Dispositivos vinculados</strong>.
+            </div>
+            <div class="text-[var(--muted-foreground)]">
+              🔒 <strong>Filtro de privacidad:</strong> Si tu mamá o un amigo te escribe <em>"Hola, ¿cómo vas?"</em>, el bot lo ignora (`reply: None`) y solo contesta cuando envían un comando con <code>/</code>.
+            </div>
+          </div>
+          <a href="http://localhost:3005" target="_blank" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:opacity-90">
+            Abrir Panel QR (:3005) ↗
+          </a>
+        </div>
+
+        <!-- Botones rápidos de comandos de WhatsApp y Telegram -->
         <div class="flex flex-wrap gap-1.5 my-3">
           <button onclick="runBotCommand('/start')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:opacity-90">/start</button>
           <button onclick="runBotCommand('/materias')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:opacity-90">/materias</button>
@@ -166,6 +193,7 @@
           <button onclick="runBotCommand('/pendientes')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:opacity-90">/pendientes (≤7 días)</button>
           <button onclick="runBotCommand('/recordar 30m Repasar rotación doble AVL')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:opacity-90">/recordar 30m ...</button>
           <button onclick="runBotCommand('/preguntar ¿Qué complejidad tiene la búsqueda binaria?')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90">/preguntar (RAG IA)</button>
+          <button onclick="runBotCommand('Hola bro, ¿nos vemos en la cafetería de la U?')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 hover:opacity-90">💬 Probar chat personal (WSP)</button>
         </div>
 
         <!-- Ventana de mensajes del Bot -->
@@ -301,7 +329,7 @@
 
       <div class="lg:col-span-6 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 space-y-3">
         <span class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">Resultados Reales de Ejecución</span>
-        <h2 class="text-base font-bold">Resumen de Pruebas Automatizadas (101 Verificaciones Totales)</h2>
+        <h2 class="text-base font-bold">Resumen de Pruebas Automatizadas (111 Verificaciones Totales)</h2>
         <div class="grid grid-cols-2 gap-3 text-xs">
           <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)]">
             <div class="text-[var(--muted-foreground)]">Suite 1 · academic-api</div>
@@ -309,9 +337,9 @@
             <div class="text-[var(--muted-foreground)] mt-1">Auth JWT, RBAC seguro, CRUD Materias y Tareas</div>
           </div>
           <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)]">
-            <div class="text-[var(--muted-foreground)]">Suite 2 · academic-bot</div>
-            <div class="text-base font-bold text-emerald-500 mt-0.5">28 / 28 PASSED</div>
-            <div class="text-[var(--muted-foreground)] mt-1">Formatters Markdown, filtros 7 días, sesiones</div>
+            <div class="text-[var(--muted-foreground)]">Suite 2 · academic-bot (WSP + TG)</div>
+            <div class="text-base font-bold text-emerald-500 mt-0.5">34 / 34 PASSED</div>
+            <div class="text-[var(--muted-foreground)] mt-1">WhatsApp QR, filtro chats personales, Telegram</div>
           </div>
           <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)]">
             <div class="text-[var(--muted-foreground)]">Suite 3 · academic-rag</div>
@@ -320,8 +348,8 @@
           </div>
           <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)]">
             <div class="text-[var(--muted-foreground)]">Suite 4 · Integración E2E Unificada</div>
-            <div class="text-base font-bold text-emerald-500 mt-0.5">37 / 37 OK</div>
-            <div class="text-[var(--muted-foreground)] mt-1">API + RAG + Bot + Mobile juntos en vivo</div>
+            <div class="text-base font-bold text-emerald-500 mt-0.5">41 / 41 OK</div>
+            <div class="text-[var(--muted-foreground)] mt-1">API + RAG + WhatsApp QR + Telegram + Mobile</div>
           </div>
         </div>
       </div>
@@ -752,7 +780,39 @@
       navigatePhone("tareas");
     }
 
-    // ---------------- SIMULADOR DE TELEGRAM (academic-bot) ----------------
+    // ---------------- SIMULADOR OMNICANAL WHATSAPP QR + TELEGRAM (academic-bot) ----------------
+    state.botChannel = "whatsapp";
+
+    function setBotChannel(chan) {
+      state.botChannel = chan;
+      const avatar = document.getElementById("bot-avatar");
+      const title = document.getElementById("bot-title");
+      const subtitle = document.getElementById("bot-subtitle");
+      const btnWsp = document.getElementById("btn-chan-whatsapp");
+      const btnTg = document.getElementById("btn-chan-telegram");
+
+      if (chan === "whatsapp") {
+        avatar.textContent = "📱";
+        avatar.className = "w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm";
+        title.textContent = "WhatsApp QR Bridge (+57 300 123 4567)";
+        subtitle.textContent = "Vinculado vía Baileys (:3005) · Filtro inteligente de chats personales activo";
+        btnWsp.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white";
+        btnTg.className = "px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]";
+      } else {
+        avatar.textContent = "🤖";
+        avatar.className = "w-9 h-9 rounded-full bg-[var(--primary)] text-[var(--primary-foreground)] flex items-center justify-center font-bold text-sm";
+        title.textContent = "Telegram Bot (@AcademicUcpBot)";
+        subtitle.textContent = "En línea vía Long Polling · Conectado a academic-api (:8000) y academic-rag (:8001)";
+        btnTg.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]";
+        btnWsp.className = "px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]";
+      }
+    }
+
+    function toggleQrModal() {
+      const el = document.getElementById("wsp-qr-drawer");
+      if (el) el.classList.toggle("hidden");
+    }
+
     function appendBotMessage(sender, htmlContent) {
       state.botMessages.push({ sender, htmlContent });
       const box = document.getElementById("bot-messages");
@@ -806,6 +866,17 @@
 
     function runBotCommand(cmd) {
       appendBotMessage("user", cmd);
+
+      // En WhatsApp QR, cualquier mensaje personal que no empiece con "/" es ignorado silenciosamente
+      if (state.botChannel === "whatsapp" && !cmd.startsWith("/")) {
+        appendBotMessage("bot", `
+          <div class="font-bold text-emerald-500">🔕 [Filtro de Privacidad WhatsApp QR]</div>
+          <div class="text-[var(--muted-foreground)]">
+            <code>processor.py</code> detectó un mensaje personal sin prefijo <code>/</code> y devolvió <code>{"reply": null}</code>. Tu WhatsApp no envía ninguna respuesta automática a tus amigos o familiares.
+          </div>
+        `);
+        return;
+      }
 
       if (cmd.startsWith("/start") || cmd.startsWith("/help")) {
         appendBotMessage("bot", `

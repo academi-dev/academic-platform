@@ -1,16 +1,17 @@
 # ==============================================================================
 # Academic Platform — Orquestador de Servicios (Docker Compose)
-# Organización: academic-dev
+# Organización: academi-dev
 # Equipo:
 #   - Jean Mena (@hilton45)
-#   - Eyfer Mena (@Eyfer3174)
+#   - Eyfer Mena (@eyfer3174-commits)
 # ==============================================================================
 # Este archivo orquesta los microservicios del ecosistema Academic:
 #   1. postgres: Base de datos relacional PostgreSQL 16 para academic-api
 #   2. academic-api: API REST FastAPI con autenticación JWT, materias, tareas, etc.
 #   3. academic-rag: Servicio de Inteligencia Artificial y Retrieval-Augmented Generation con ChromaDB
 #   4. academic-bot: Bot conversacional de Telegram para interacción de estudiantes
-#   5. nginx: Gateway / Reverse Proxy unificado para enrutar tráfico web y móvil
+#   5. academic-whatsapp: Conector de WhatsApp por código QR (@whiskeysockets/baileys + puente Python)
+#   6. nginx: Gateway / Reverse Proxy unificado para enrutar tráfico web y móvil
 # ==============================================================================
 
 version: "3.9"
@@ -129,7 +130,33 @@ services:
       - academic-net
 
   # ----------------------------------------------------------------------------
-  # Servicio 5: Gateway / Reverse Proxy (Nginx)
+  # Servicio 5: Conector de WhatsApp por Código QR (academic-whatsapp)
+  # ----------------------------------------------------------------------------
+  academic-whatsapp:
+    build:
+      context: ../../proyecto 2/academic-bot
+      dockerfile: Dockerfile.whatsapp
+    image: academic-whatsapp:latest
+    container_name: academic-whatsapp
+    restart: unless-stopped
+    depends_on:
+      academic-api:
+        condition: service_healthy
+      academic-rag:
+        condition: service_started
+    environment:
+      API_BASE_URL: http://academic-api:8000/api/v1
+      RAG_BASE_URL: http://academic-rag:8000/api/v1
+      WHATSAPP_WEB_PORT: 3005
+    volumes:
+      - whatsapp-auth:/app/whatsapp_qr/auth_info_baileys
+    ports:
+      - "${WHATSAPP_PORT:-3005}:3005"
+    networks:
+      - academic-net
+
+  # ----------------------------------------------------------------------------
+  # Servicio 6: Gateway / Reverse Proxy (Nginx)
   # ----------------------------------------------------------------------------
   nginx:
     image: nginx:1.25-alpine
@@ -163,3 +190,5 @@ volumes:
     name: academic_postgres_data
   chroma-data:
     name: academic_chroma_data
+  whatsapp-auth:
+    name: academic_whatsapp_auth

@@ -255,9 +255,11 @@ def main() -> int:
                 format_rag_response,
                 format_tareas,
             )
+            from bot.whatsapp.processor import WhatsAppMessageProcessor
 
             bot_api = AcademicApiClient(base_url=f"{api}/api/v1")
             bot_rag = AcademicRagClient(base_url=f"{rag}/api/v1")
+            wsp_proc = WhatsAppMessageProcessor(api_client=bot_api, rag_client=bot_rag)
 
             async def _flujo_bot():
                 tok_resp = await bot_api.login(email=email, password=password)
@@ -268,9 +270,31 @@ def main() -> int:
                     query="¿Cuáles son los pilares de la Programación Orientada a Objetos?",
                     token=tok,
                 )
-                return mats, tars, ans
+                # Flujo completo de WhatsApp QR (conversación multi-paso + filtro personal)
+                jid = "573001234567@s.whatsapp.net"
+                wsp_personal = await wsp_proc.process_message(jid, "Hola bro, nos vemos en la U")
+                await wsp_proc.process_message(jid, "/login")
+                await wsp_proc.process_message(jid, email)
+                wsp_login = await wsp_proc.process_message(jid, password)
+                wsp_mats = await wsp_proc.process_message(jid, "/materias")
+                wsp_rag = await wsp_proc.process_message(
+                    jid, "/preguntar ¿Qué complejidad tiene la búsqueda binaria?"
+                )
+                wsp_rem = await wsp_proc.process_message(
+                    jid, "/recordar 15m Sustentar proyecto Academic"
+                )
+                return mats, tars, ans, wsp_personal, wsp_login, wsp_mats, wsp_rag, wsp_rem
 
-            mats_bot, tars_bot, ans_bot = asyncio.run(_flujo_bot())
+            (
+                mats_bot,
+                tars_bot,
+                ans_bot,
+                wsp_personal,
+                wsp_login,
+                wsp_mats,
+                wsp_rag,
+                wsp_rem,
+            ) = asyncio.run(_flujo_bot())
             verificar(
                 "academic-bot autentica y lista materias desde academic-api",
                 len(mats_bot) == 1 and mats_bot[0]["id"] == materia_id,
@@ -290,6 +314,29 @@ def main() -> int:
             verificar(
                 "academic-bot formatea mensajes de /materias y /tareas",
                 "Estructuras de Datos" in msg_mats and "Implementar árbol AVL" in msg_tars,
+            )
+            verificar(
+                "WhatsApp QR ignora mensajes personales sin comando ('/...')",
+                wsp_personal.get("reply") is None,
+                str(wsp_personal),
+            )
+            verificar(
+                "WhatsApp QR completa login conversacional contra academic-api",
+                "exitoso" in (wsp_login.get("reply") or "").lower()
+                or "bienvenido" in (wsp_login.get("reply") or "").lower(),
+                str(wsp_login)[:200],
+            )
+            verificar(
+                "WhatsApp QR responde /materias y /preguntar con citas de página del PDF",
+                "Estructuras de Datos" in (wsp_mats.get("reply") or "")
+                and "Pág. 2" in (wsp_rag.get("reply") or ""),
+                str(wsp_rag)[:200],
+            )
+            verificar(
+                "WhatsApp QR agenda recordatorios (/recordar 15m) con delay_seconds=900",
+                bool(wsp_rem.get("reminder"))
+                and wsp_rem["reminder"].get("delay_seconds") == 900,
+                str(wsp_rem),
             )
 
             if mobile_service.exists():
