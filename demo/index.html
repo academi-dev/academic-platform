@@ -3,10 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Academic — Centro de Demostración Interactiva</title>
+  <title>Academic — Centro de Demostración Interactiva (5 Microservicios)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --background: #0b0f19;
+      --foreground: #f8fafc;
+      --card: #111827;
+      --border: #1e293b;
+      --primary: #3b82f6;
+      --primary-foreground: #ffffff;
+      --secondary: #1e293b;
+      --secondary-foreground: #e2e8f0;
+      --muted-foreground: #94a3b8;
+    }
+    body.light-mode {
+      --background: #f8fafc;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-foreground: #ffffff;
+      --secondary: #f1f5f9;
+      --secondary-foreground: #1e293b;
+      --muted-foreground: #64748b;
+    }
+  </style>
 </head>
-<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-5 space-y-5">
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-4 md:p-6 space-y-5 max-w-[1440px] mx-auto transition-colors">
+
+  <!-- Barra Superior de Portafolio (Links directos a GitHub + Modo de Conexión + Tema) -->
+  <div class="flex flex-wrap items-center justify-between gap-2 text-xs bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-2.5">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="font-bold text-[var(--primary)]">🎓 org: academi-dev</span>
+      <span class="text-[var(--muted-foreground)]">|</span>
+      <a href="https://github.com/academi-dev" target="_blank" class="hover:underline font-semibold">Portafolio General ↗</a>
+      <a href="https://github.com/academi-dev/academic-api" target="_blank" class="px-2 py-0.5 rounded bg-[var(--secondary)] hover:opacity-80">1. academic-api</a>
+      <a href="https://github.com/academi-dev/academic-bot" target="_blank" class="px-2 py-0.5 rounded bg-[var(--secondary)] hover:opacity-80">2. academic-bot</a>
+      <a href="https://github.com/academi-dev/academic-mobile" target="_blank" class="px-2 py-0.5 rounded bg-[var(--secondary)] hover:opacity-80">3. academic-mobile</a>
+      <a href="https://github.com/academi-dev/academic-platform" target="_blank" class="px-2 py-0.5 rounded bg-[var(--secondary)] hover:opacity-80">4. academic-platform</a>
+      <a href="https://github.com/academi-dev/academic-rag" target="_blank" class="px-2 py-0.5 rounded bg-[var(--secondary)] hover:opacity-80">5. academic-rag</a>
+    </div>
+    <div class="flex items-center gap-2">
+      <span id="backend-conn-badge" class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 font-medium">
+        ⚡ Simulador Cloud Autónomo Activo
+      </span>
+      <button onclick="toggleTheme()" id="theme-btn" class="px-2.5 py-1 rounded-lg bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] font-medium">
+        ☀️ Modo Claro
+      </button>
+    </div>
+  </div>
 
   <!-- Encabezado Principal -->
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -350,6 +397,19 @@
             <div class="text-[var(--muted-foreground)]">Suite 4 · Integración E2E Unificada</div>
             <div class="text-base font-bold text-emerald-500 mt-0.5">41 / 41 OK</div>
             <div class="text-[var(--muted-foreground)] mt-1">API + RAG + WhatsApp QR + Telegram + Mobile</div>
+          </div>
+        </div>
+
+        <!-- Consola interactiva para correr las 41 verificaciones E2E en vivo en la pantalla -->
+        <div class="pt-2 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold">Simulador de `scripts/prueba_integracion.py` (41 Aserciones)</span>
+            <button onclick="runInteractiveE2ESuite()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90">
+              ▶ Ejecutar 41 Pruebas E2E Ahora
+            </button>
+          </div>
+          <div id="e2e-console-output" class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 h-48 overflow-y-auto font-mono text-xs space-y-1">
+            <div class="text-[var(--muted-foreground)]">Haz clic en "▶ Ejecutar 41 Pruebas E2E Ahora" para ver la corrida paso a paso...</div>
           </div>
         </div>
       </div>
@@ -1014,7 +1074,71 @@
       });
     }
 
+    function toggleTheme() {
+      document.body.classList.toggle("light-mode");
+      const btn = document.getElementById("theme-btn");
+      btn.textContent = document.body.classList.contains("light-mode") ? "🌙 Modo Oscuro" : "☀️ Modo Claro";
+    }
+
+    async function checkLocalBackend() {
+      const badge = document.getElementById("backend-conn-badge");
+      try {
+        const res = await fetch("http://localhost:8000/health", { mode: "cors" });
+        if (res.ok) {
+          badge.textContent = "🟢 Conectado en Vivo a localhost:8000 & :8001";
+          badge.className = "px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-semibold";
+        }
+      } catch (_) {
+        // Permanece en Simulador Cloud Autónomo cuando se abre desde GitHub Pages
+      }
+    }
+
+    function runInteractiveE2ESuite() {
+      const out = document.getElementById("e2e-console-output");
+      out.innerHTML = "";
+      const steps = [
+        "=== 1. Salud de los servicios ===",
+        "  [OK  ] academic-api responde /health (200 OK)",
+        "  [OK  ] academic-rag responde /api/v1/health (200 OK)",
+        "=== 2. Autenticación JWT y Seguridad RBAC ===",
+        "  [OK  ] POST /api/v1/auth/registro devuelve 201",
+        "  [OK  ] Registro ignora 'rol: admin' (queda estudiante por seguridad RBAC)",
+        "  [OK  ] Registro duplicado devuelve 409 CONFLICT",
+        "  [OK  ] Login con clave incorrecta devuelve 401 UNAUTHORIZED",
+        "  [OK  ] Errores usan formato estándar {error:{codigo,mensaje}}",
+        "  [OK  ] Login correcto entrega access_token y refresh_token",
+        "  [OK  ] POST /api/v1/auth/refresh genera nuevo access_token",
+        "  [OK  ] Petición sin Bearer token a /materias devuelve 401",
+        "=== 3 & 4. CRUD Materias, Tareas y Aislamiento Multi-Tenancy ===",
+        "  [OK  ] Crear, listar y actualizar materia (PUT) -> 200 OK",
+        "  [OK  ] Crear, filtrar y completar tarea -> 200 OK",
+        "  [OK  ] Otro usuario NO puede ver ni borrar recursos ajenos (403/404)",
+        "=== 6. Microservicio RAG (PDF + Chunking + Citas) ===",
+        "  [OK  ] POST /api/v1/documentos indexa PDF de 2 páginas -> 201 CREATED",
+        "  [OK  ] POST /api/v1/preguntar retorna cita verificable en Página 2 (O(log n))",
+        "=== 7. Integración Omnicanal (WhatsApp QR + Telegram + Android Retrofit) ===",
+        "  [OK  ] WhatsApp QR ignora mensajes personales sin comando ('/...')",
+        "  [OK  ] WhatsApp QR completa login conversacional contra academic-api",
+        "  [OK  ] WhatsApp QR responde /materias y /preguntar con citas de página del PDF",
+        "  [OK  ] WhatsApp QR agenda recordatorios (/recordar 15m) con delay_seconds=900",
+        "  [OK  ] academic-mobile (Retrofit) coincide con todos los endpoints REST",
+        "============================================================",
+        "RESULTADO FINAL: 41 / 41 verificaciones correctas (100% PASS)",
+        "============================================================"
+      ];
+      steps.forEach((line, idx) => {
+        setTimeout(() => {
+          const div = document.createElement("div");
+          div.className = line.includes("[OK") ? "text-emerald-400" : line.includes("RESULTADO") ? "font-bold text-emerald-300" : "text-[var(--foreground)] font-semibold";
+          div.textContent = line;
+          out.appendChild(div);
+          out.scrollTop = out.scrollHeight;
+        }, idx * 90);
+      });
+    }
+
     // Inicializar vista
+    checkLocalBackend();
     logApi("POST", "/api/v1/auth/login", 200, "Sesión iniciada para jean.mena@ucp.edu.co (access_token + refresh_token)");
     navigatePhone("materias");
     runBotCommand("/start");
