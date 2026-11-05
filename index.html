@@ -1,1149 +1,1887 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Academic — Centro de Demostración Interactiva (5 Microservicios)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
-  <style>
-    :root {
-      --background: #0b0f19;
-      --foreground: #f8fafc;
-      --card: #111827;
-      --border: #1e293b;
-      --primary: #3b82f6;
-      --primary-foreground: #ffffff;
-      --secondary: #1e293b;
-      --secondary-foreground: #e2e8f0;
-      --muted-foreground: #94a3b8;
-    }
-    body.light-mode {
-      --background: #f8fafc;
-      --foreground: #0f172a;
-      --card: #ffffff;
-      --border: #e2e8f0;
-      --primary: #2563eb;
-      --primary-foreground: #ffffff;
-      --secondary: #f1f5f9;
-      --secondary-foreground: #1e293b;
-      --muted-foreground: #64748b;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Academic — Guía del Código</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" />
+<style>
+  :root { --bg:#0b1020; --panel:#121a2e; --panel2:#0f1628; --border:#22304d; --text:#e6ebf5; --muted:#94a3b8; --accent:#60a5fa; --ok:#34d399; --warn:#fbbf24; }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+  code { font-family: "Cascadia Code", Consolas, monospace; font-size:.88em; background:#1b2540; padding:.1em .35em; border-radius:4px; }
+  .layout { display:grid; grid-template-columns: 260px 1fr; max-width:1400px; margin:0 auto; }
+  nav { position:sticky; top:0; height:100vh; overflow-y:auto; padding:28px 20px; border-right:1px solid var(--border); }
+  nav .brand { font-weight:800; font-size:1.1rem; margin-bottom:4px; }
+  nav .sub { color:var(--muted); font-size:.8rem; margin-bottom:22px; }
+  nav a { display:block; padding:7px 10px; border-radius:8px; color:var(--text); font-size:.9rem; }
+  nav a:hover { background:var(--panel); text-decoration:none; }
+  nav .grp { color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; margin:18px 10px 6px; }
+  main { padding:36px 44px 80px; min-width:0; }
+  header.hero { background:linear-gradient(135deg,#172554,#0f172a 60%); border:1px solid var(--border); border-radius:18px; padding:34px; margin-bottom:34px; }
+  header.hero h1 { margin:0 0 8px; font-size:2rem; }
+  header.hero p { color:#cbd5e1; margin:6px 0; max-width:900px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+  .chip { background:#1e293b; border:1px solid var(--border); padding:6px 12px; border-radius:999px; font-size:.82rem; }
+  .chip.ok { color:var(--ok); border-color:#065f46; }
+  .btns { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
+  .btn { background:var(--accent); color:#0b1020; font-weight:700; padding:10px 16px; border-radius:10px; font-size:.9rem; }
+  .btn.alt { background:transparent; color:var(--text); border:1px solid var(--border); }
+  .btn:hover { text-decoration:none; opacity:.9; }
+  section { margin-bottom:56px; scroll-margin-top:20px; }
+  h2 { margin:0; font-size:1.5rem; }
+  .sec-head { display:flex; gap:14px; align-items:center; margin-bottom:14px; }
+  .num { width:42px; height:42px; border-radius:12px; background:var(--accent); color:#0b1020; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+  .sec-head .gh { font-size:.85rem; }
+  .intro { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px 20px; margin-bottom:14px; }
+  .intro p { margin:6px 0; }
+  details.tree { margin-bottom:18px; background:var(--panel2); border:1px solid var(--border); border-radius:12px; padding:10px 16px; }
+  details.tree summary { cursor:pointer; font-weight:600; color:var(--muted); }
+  details.tree pre { margin:10px 0 4px; font-size:.82rem; color:#cbd5e1; overflow-x:auto; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:14px; margin-bottom:22px; overflow:hidden; }
+  .card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:16px 20px 0; flex-wrap:wrap; }
+  .card h4 { margin:0 0 4px; font-size:1.05rem; }
+  .path { background:none; padding:0; color:var(--muted); font-size:.78rem; }
+  .gh { font-size:.82rem; white-space:nowrap; }
+  .explain { padding:6px 20px 4px; color:#d6deeb; font-size:.94rem; }
+  .explain ul { margin:6px 0 10px; padding-left:20px; }
+  pre[class*=language-] { margin:0 !important; border-radius:0 !important; border-top:1px solid var(--border); font-size:.82rem !important; max-height:560px; }
+  .arch { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px; overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:.9rem; }
+  th, td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; font-size:.8rem; text-transform:uppercase; letter-spacing:.05em; }
+  .tablewrap { background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow-x:auto; margin-top:16px; }
+  ol.flow { counter-reset:s; list-style:none; padding:0; margin:0; }
+  ol.flow li { counter-increment:s; position:relative; padding:10px 14px 10px 52px; background:var(--panel); border:1px solid var(--border); border-radius:12px; margin-bottom:8px; }
+  ol.flow li::before { content:counter(s); position:absolute; left:14px; top:10px; width:26px; height:26px; border-radius:50%; background:#1e3a8a; color:#bfdbfe; font-weight:700; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
+  .flows { display:grid; grid-template-columns:repeat(auto-fit,minmax(380px,1fr)); gap:20px; }
+  .flows h3 { margin:0 0 10px; font-size:1.05rem; }
+  ol.feedback { padding-left:22px; }
+  ol.feedback li { background:var(--panel); border:1px solid var(--border); border-left:4px solid var(--warn); border-radius:10px; padding:12px 16px; margin-bottom:12px; }
+  ol.feedback h4 { margin:0 0 4px; }
+  ol.feedback p { margin:0; color:#d6deeb; }
+  .note { background:#1c1917; border:1px solid #78350f; color:#fde68a; border-radius:12px; padding:14px 18px; margin:14px 0; font-size:.92rem; }
+  pre.cmd { background:#0a0f1d; border:1px solid var(--border); border-radius:10px; padding:12px 14px; overflow-x:auto; font-size:.82rem; }
+  footer { color:var(--muted); font-size:.85rem; border-top:1px solid var(--border); padding-top:20px; margin-top:40px; }
+  @media (max-width: 900px) { .layout { grid-template-columns:1fr; } nav { position:static; height:auto; border-right:none; border-bottom:1px solid var(--border); } main { padding:24px 18px; } }
+</style>
 </head>
-<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-4 md:p-6 space-y-5 max-w-[1440px] mx-auto transition-colors">
+<body>
+<div class="layout">
+<nav>
+  <div class="brand">🎓 Academic</div>
+  <div class="sub">Guía del código · academi-dev</div>
+  <a href="#inicio">Cómo leer esta guía</a>
+  <a href="#arquitectura">Arquitectura</a>
+  <div class="grp">Proyectos</div>
+  <a href="#api">1 · academic-api</a>
+  <a href="#rag">2 · academic-rag</a>
+  <a href="#bot">3 · academic-bot</a>
+  <a href="#mobile">4 · academic-mobile</a>
+  <a href="#platform">5 · academic-platform</a>
+  <div class="grp">Visión transversal</div>
+  <a href="#flujos">Flujos completos</a>
+  <a href="#pruebas">Pruebas y cómo ejecutarlo</a>
+  <a href="#feedback">⭐ Dónde pedimos su retroalimentación</a>
+  <div class="grp">Enlaces</div>
+  <a href="demo.html" target="_blank">Demo interactiva ↗</a>
+  <a href="https://github.com/academi-dev" target="_blank">Organización en GitHub ↗</a>
+</nav>
 
-  <!-- Barra Superior de Portafolio (Links directos a GitHub + Modo de Conexión + Tema) -->
-  <div class="flex flex-wrap items-center justify-between gap-2 text-xs bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-2.5">
-    <div class="flex flex-wrap items-center gap-2">
-      <span class="font-bold text-[var(--primary)]">🎓 org: academi-dev</span>
-      <span class="text-[var(--muted-foreground)]">|</span>
-      <a href="https://github.com/academi-dev" target="_blank" class="hover:underline font-semibold">Portafolio General ↗</a>
-      <a href="https://github.com/academi-dev/academic-api" target="_blank" class="px-2 py-0.5 rounded bg-[var(--secondary)] hover:opacity-80">1. academic-api</a>
-      <a href="https://github.com/academi-dev/academic-bot" target="_blank" class="px-2 py-0.5 rounded bg-[var(--secondary)] hover:opacity-80">2. academic-bot</a>
-      <a href="https://github.com/academi-dev/academic-mobile" target="_blank" class="px-2 py-0.5 rounded bg-[var(--secondary)] hover:opacity-80">3. academic-mobile</a>
-      <a href="https://github.com/academi-dev/academic-platform" target="_blank" class="px-2 py-0.5 rounded bg-[var(--secondary)] hover:opacity-80">4. academic-platform</a>
-      <a href="https://github.com/academi-dev/academic-rag" target="_blank" class="px-2 py-0.5 rounded bg-[var(--secondary)] hover:opacity-80">5. academic-rag</a>
+<main>
+  <header class="hero" id="inicio">
+    <h1>Academic — Guía del Código</h1>
+    <p>Sistema de gestión académica con API, asistente sobre apuntes PDF, bot de WhatsApp/Telegram y app Android,
+    organizado en <strong>5 repositorios</strong>.</p>
+    <p>Esta guía recorre las partes más importantes del código, explicadas paso a paso, para facilitar su revisión.
+    Cada fragmento se extrae <strong>directamente de los repositorios</strong>: los números de línea son reales y el
+    botón <em>“Ver en GitHub”</em> abre el archivo completo en esa posición. Al final dejamos las preguntas concretas
+    sobre las que nos gustaría su opinión.</p>
+    <div class="chips">
+      <span class="chip">Python · FastAPI</span><span class="chip">Kotlin · Android</span><span class="chip">Node.js</span>
+      <span class="chip">PostgreSQL</span><span class="chip">Docker · Nginx</span>
+      <span class="chip ok">70 pruebas unitarias ✓</span><span class="chip ok">41/41 verificaciones de integración ✓</span>
     </div>
-    <div class="flex items-center gap-2">
-      <span id="backend-conn-badge" class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 font-medium">
-        ⚡ Simulador Cloud Autónomo Activo
-      </span>
-      <button onclick="toggleTheme()" id="theme-btn" class="px-2.5 py-1 rounded-lg bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] font-medium">
-        ☀️ Modo Claro
-      </button>
+    <div class="btns">
+      <a class="btn" href="#arquitectura">Empezar el recorrido</a>
+      <a class="btn alt" href="#feedback">Ir a las preguntas para el profesor</a>
+      <a class="btn alt" href="demo.html" target="_blank">Ver demo interactiva ↗</a>
     </div>
-  </div>
+  </header>
 
-  <!-- Encabezado Principal -->
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-    <div>
-      <div class="flex items-center gap-2.5 flex-wrap">
-        <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
-          ECOSISTEMA EN VIVO
-        </span>
-        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
-          org: academi-dev · 5 Repositorios Sincronizados
-        </span>
-        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
-          ● 70 Unit Tests + 41/41 E2E OK
-        </span>
-      </div>
-      <h1 class="text-xl font-bold mt-2">Academic — Demostración Interactiva de los 5 Proyectos Unidos</h1>
-      <p class="text-sm text-[var(--muted-foreground)] mt-1">
-        Todo lo que hagas en el celular Android se refleja al instante en WhatsApp QR, en el Bot de Telegram, en el asistente RAG y en el inspector HTTP de la API.
-      </p>
+  <section id="arquitectura">
+    <h2 style="margin-bottom:14px">Arquitectura general</h2>
+    <div class="arch">
+      <pre class="mermaid">
+flowchart LR
+    subgraph Clientes
+        APP["📱 academic-mobile<br/>Android · Kotlin"]
+        WA["🟢 WhatsApp<br/>vinculado por QR"]
+        TG["✈️ Telegram"]
+    end
+    subgraph Bot["academic-bot"]
+        NODE["Node.js · Baileys"]
+        PY["Motor Python<br/>comandos y recordatorios"]
+    end
+    GW["🌐 Nginx :80"]
+    API["⚙️ academic-api<br/>FastAPI · JWT"]
+    RAG["🧠 academic-rag<br/>PDF · búsqueda · citas"]
+    DB[("PostgreSQL")]
+    VEC[("ChromaDB")]
+    WA --> NODE -- "JSON por STDIO" --> PY
+    TG --> PY
+    APP -- "HTTP + Bearer JWT" --> GW
+    GW -- "/api/*" --> API
+    GW -- "/rag/*" --> RAG
+    PY -- "httpx" --> API
+    PY -- "httpx" --> RAG
+    API --> DB
+    RAG --> VEC
+      </pre>
     </div>
-
-    <!-- Selector de modo de vista -->
-    <div class="flex flex-wrap gap-2">
-      <button onclick="setMainMode('split')" id="mode-split" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] transition">
-        Vista Unificada (Celular + Bot + API)
-      </button>
-      <button onclick="setMainMode('rag')" id="mode-rag" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] transition">
-        Laboratorio RAG (PDFs + IA)
-      </button>
-      <button onclick="setMainMode('platform')" id="mode-platform" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] transition">
-        Orquestador Docker & Pruebas (4/5)
-      </button>
+    <div class="tablewrap">
+      <table>
+        <tr><th>#</th><th>Repositorio</th><th>Responsabilidad</th><th>Pruebas</th></tr>
+        <tr><td>1</td><td><a href="#api">academic-api</a></td><td>Usuarios, autenticación, materias y tareas. Única pieza con acceso a la base de datos.</td><td>23 ✓</td></tr>
+        <tr><td>2</td><td><a href="#rag">academic-rag</a></td><td>Indexar PDFs y responder preguntas con citas de página.</td><td>13 ✓</td></tr>
+        <tr><td>3</td><td><a href="#bot">academic-bot</a></td><td>Canal conversacional por WhatsApp y Telegram.</td><td>34 ✓</td></tr>
+        <tr><td>4</td><td><a href="#mobile">academic-mobile</a></td><td>App nativa Android.</td><td>3 archivos JUnit (sin ejecutar aún)</td></tr>
+        <tr><td>5</td><td><a href="#platform">academic-platform</a></td><td>Docker Compose, gateway, prueba de integración, documentación.</td><td>41/41 ✓</td></tr>
+      </table>
     </div>
-  </div>
+  </section>
 
-  <!-- Barra de estado de los 5 microservicios -->
-  <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 flex items-center justify-between">
+  
+  <section id="api">
+    <div class="sec-head">
+      <span class="num">1</span>
       <div>
-        <div class="text-xs text-[var(--muted-foreground)]">Proyecto 1 · FastAPI</div>
-        <div class="text-sm font-semibold">academic-api</div>
-        <div class="text-xs text-emerald-500 font-medium">:8000 · JWT + RBAC</div>
+        <h2>academic-api — API central</h2>
+        <a class="gh" href="https://github.com/academi-dev/academic-api" target="_blank" rel="noopener">github.com/academi-dev/academic-api ↗</a>
       </div>
-      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
     </div>
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 flex items-center justify-between">
-      <div>
-        <div class="text-xs text-[var(--muted-foreground)]">Proyecto 2 · WhatsApp + Telegram</div>
-        <div class="text-sm font-semibold">academic-bot</div>
-        <div class="text-xs text-emerald-500 font-medium">QR Baileys :3005 + Polling</div>
-      </div>
-      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-    </div>
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 flex items-center justify-between">
-      <div>
-        <div class="text-xs text-[var(--muted-foreground)]">Proyecto 3 · Android Kotlin</div>
-        <div class="text-sm font-semibold">academic-mobile</div>
-        <div class="text-xs text-emerald-500 font-medium">MVVM · Material 3</div>
-      </div>
-      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-    </div>
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 flex items-center justify-between">
-      <div>
-        <div class="text-xs text-[var(--muted-foreground)]">Proyecto 4 · Docker + Nginx</div>
-        <div class="text-sm font-semibold">academic-platform</div>
-        <div class="text-xs text-emerald-500 font-medium">Gateway :80</div>
-      </div>
-      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-    </div>
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 flex items-center justify-between col-span-2 md:col-span-1">
-      <div>
-        <div class="text-xs text-[var(--muted-foreground)]">Proyecto 5 · ChromaDB</div>
-        <div class="text-sm font-semibold">academic-rag</div>
-        <div class="text-xs text-emerald-500 font-medium">:8001 · Citas PDF</div>
-      </div>
-      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-    </div>
-  </div>
-
-  <!-- SECCIÓN 1: VISTA UNIFICADA (CELULAR ANDROID + BOT TELEGRAM + CONSOLA API) -->
-  <div id="section-split" class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-
-    <!-- COLUMNA IZQUIERDA: EMULADOR ANDROID (academic-mobile) -->
-    <div class="xl:col-span-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm">
-      <div class="flex items-center justify-between mb-3">
+    <div class="intro">
+          <p><strong>Qué hace:</strong> es el núcleo del sistema. Gestiona usuarios, materias y tareas, y es la única pieza
+          que habla con la base de datos. La app, el bot y la demo la consumen por HTTP.</p>
+          <p><strong>Tecnologías:</strong> Python, FastAPI, SQLAlchemy 2.0, Alembic, PostgreSQL (SQLite en local), JWT, bcrypt.</p>
+          <p><strong>Recorrido sugerido:</strong> seguir una petición de login (1–3), ver cómo se protegen las rutas (4) y
+          cómo se garantiza que cada usuario solo vea lo suyo (7).</p></div>
+    <details class="tree"><summary>Estructura de carpetas</summary><pre>academic-api/
+├── app/
+│   ├── main.py            # Crea la app FastAPI, CORS, manejo global de errores, /health
+│   ├── config.py          # Variables de entorno (SECRET_KEY, DATABASE_URL, expiración JWT)
+│   ├── database.py        # Motor SQLAlchemy, sesión por petición, tipo GUID
+│   ├── exceptions.py      # APIError → {&quot;error&quot;: {&quot;codigo&quot;, &quot;mensaje&quot;}}
+│   ├── auth/              # router (endpoints) · service (JWT, bcrypt) · dependencies (get_current_user)
+│   ├── users/             # Modelo User y rol (ESTUDIANTE / ADMIN)
+│   ├── materias/          # models · schemas · service · router
+│   └── tareas/            # models · schemas · service · router
+├── alembic/               # Migraciones de base de datos
+└── tests/                 # 23 pruebas (auth, materias, tareas)</pre></details>
+    
+    <article class="card">
+      <div class="card-head">
         <div>
-          <span class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Proyecto 3 · Kotlin + MVVM</span>
-          <h2 class="text-base font-bold">Emulador Android — Academic Mobile</h2>
+          <h4>1. Login: de credenciales a un par de tokens</h4>
+          <code class="path">academic-api/app/auth/router.py · líneas 42–69</code>
         </div>
-        <div class="flex gap-1.5">
-          <button onclick="navigatePhone('login')" class="px-2.5 py-1 rounded-lg text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
-            Login
-          </button>
-          <button onclick="navigatePhone('materias')" class="px-2.5 py-1 rounded-lg text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
-            App
-          </button>
-        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-api/blob/main/app/auth/router.py#L42-L69" target="_blank" rel="noopener">Ver en GitHub ↗</a>
       </div>
+      <div class="explain">
+      <p>Este es el endpoint <code>POST /api/v1/auth/login</code>. Recibe correo y contraseña, delega la validación en
+      <code>authenticate_user</code> y, si todo es correcto, emite <strong>dos tokens JWT</strong>:</p>
+      <ul>
+        <li><strong>access_token</strong>: vida corta (30 min por defecto). Se envía en cada petición.</li>
+        <li><strong>refresh_token</strong>: vida larga (7 días). Solo sirve para pedir un nuevo access token.</li>
+      </ul>
+      <p>El campo <code>sub</code> guarda el UUID del usuario; es lo que después usa la API para saber
+      <em>quién</em> hace cada petición.</p></div>
+      <pre class="line-numbers" data-start="42"><code class="language-python">@router.post(
+    &quot;/login&quot;,
+    response_model=TokenResponse,
+    status_code=status.HTTP_200_OK,
+    summary=&quot;Iniciar sesión&quot;,
+    description=&quot;Valida credenciales y genera un par de tokens JWT (acceso y refresco).&quot;
+)
+def iniciar_sesion(
+    login_data: LoginRequest,
+    db: Session = Depends(get_db)
+) -&gt; TokenResponse:
+    &quot;&quot;&quot;Autentica al usuario y devuelve el token de acceso y de refresco.&quot;&quot;&quot;
+    usuario = authenticate_user(db=db, email=login_data.email, password=login_data.password)
+    
+    token_data = {
+        &quot;sub&quot;: str(usuario.id),
+        &quot;email&quot;: usuario.email,
+        &quot;rol&quot;: usuario.rol.value
+    }
+    
+    access_token = create_access_token(data=token_data)
+    refresh_token = create_refresh_token(data=token_data)
 
-      <!-- Carcasa de teléfono Android -->
-      <div class="mx-auto max-w-[340px] rounded-[36px] border-4 border-[var(--border)] bg-[var(--background)] shadow-lg overflow-hidden">
-        <!-- Barra de estado de Android -->
-        <div class="px-5 py-2 bg-[var(--card)] border-b border-[var(--border)] flex items-center justify-between text-xs text-[var(--muted-foreground)]">
-          <span class="font-semibold">12:35</span>
-          <span class="w-16 h-3 rounded-full bg-[var(--border)]"></span>
-          <span>5G · 98%</span>
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type=&quot;bearer&quot;
+    )</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>2. Cómo se firma un token</h4>
+          <code class="path">academic-api/app/auth/service.py · líneas 34–50</code>
         </div>
-
-        <!-- Contenido dinámico de la pantalla del teléfono -->
-        <div id="phone-viewport" class="p-4 min-h-[520px] flex flex-col justify-between">
-          <!-- Renderizado por JS -->
-        </div>
-
-        <!-- Barra de navegación inferior Material 3 -->
-        <div id="phone-bottom-nav" class="bg-[var(--card)] border-t border-[var(--border)] grid grid-cols-3 py-2 text-center">
-          <button onclick="navigatePhone('materias')" id="nav-btn-materias" class="flex flex-col items-center gap-0.5 text-xs font-semibold text-[var(--primary)]">
-            <span>📚</span>
-            <span>Materias</span>
-          </button>
-          <button onclick="navigatePhone('tareas')" id="nav-btn-tareas" class="flex flex-col items-center gap-0.5 text-xs text-[var(--muted-foreground)]">
-            <span>📋</span>
-            <span>Tareas</span>
-          </button>
-          <button onclick="navigatePhone('crear-tarea')" id="nav-btn-crear" class="flex flex-col items-center gap-0.5 text-xs text-[var(--muted-foreground)]">
-            <span>➕</span>
-            <span>Nueva Tarea</span>
-          </button>
-        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-api/blob/main/app/auth/service.py#L34-L50" target="_blank" rel="noopener">Ver en GitHub ↗</a>
       </div>
-    </div>
+      <div class="explain">
+      <p>El token se firma con <code>SECRET_KEY</code> y el algoritmo <code>HS256</code>. Además de los datos del usuario
+      se agregan <code>exp</code> (expiración), <code>iat</code> (emitido en) y <code>type</code>.</p>
+      <p>El campo <code>type</code> es una decisión de diseño: evita que alguien use un <em>refresh token</em> como si fuera
+      un <em>access token</em> (se valida en el siguiente fragmento).</p></div>
+      <pre class="line-numbers" data-start="34"><code class="language-python">def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -&gt; str:
+    &quot;&quot;&quot;
+    Genera un token de acceso JWT firmado con expiración corta.
+    &quot;&quot;&quot;
+    to_encode = data.copy()
+    now_utc = datetime.now(timezone.utc)
+    if expires_delta:
+        expire = now_utc + expires_delta
+    else:
+        expire = now_utc + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    <!-- COLUMNA DERECHA: BOT DE TELEGRAM + INSPECTOR HTTP EN VIVO -->
-    <div class="xl:col-span-7 space-y-5">
-
-      <!-- SIMULADOR OMNICANAL WHATSAPP QR + TELEGRAM (academic-bot) -->
-      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm">
-        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[var(--border)]">
-          <div class="flex items-center gap-2.5">
-            <div id="bot-avatar" class="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">
-              📱
-            </div>
-            <div>
-              <div id="bot-title" class="text-sm font-bold">WhatsApp QR Bridge (+57 300 123 4567)</div>
-              <div id="bot-subtitle" class="text-xs text-emerald-500">Vinculado vía Baileys (:3005) · Filtro inteligente de chats personales activo</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button onclick="setBotChannel('whatsapp')" id="btn-chan-whatsapp" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white">
-              🟢 WhatsApp QR
-            </button>
-            <button onclick="setBotChannel('telegram')" id="btn-chan-telegram" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
-              🔵 Telegram
-            </button>
-            <button onclick="toggleQrModal()" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
-              📷 QR :3005
-            </button>
-            <button onclick="clearBotChat()" class="px-2.5 py-1 rounded-lg text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
-              Limpiar
-            </button>
-          </div>
+    to_encode.update({
+        &quot;exp&quot;: expire,
+        &quot;iat&quot;: now_utc,
+        &quot;type&quot;: &quot;access&quot;
+    })
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>3. Validación del token (firma, vigencia y tipo)</h4>
+          <code class="path">academic-api/app/auth/service.py · líneas 72–105</code>
         </div>
-
-        <!-- Panel colapsable de vinculación por Código QR (WhatsApp Web Bridge) -->
-        <div id="wsp-qr-drawer" class="hidden my-3 p-3 rounded-xl bg-[var(--background)] border border-emerald-500/40 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div class="space-y-1 text-xs">
-            <div class="font-bold text-emerald-500">📱 Vinculación en Vivo por Código QR (@whiskeysockets/baileys)</div>
-            <div class="text-[var(--muted-foreground)]">
-              Ejecuta <code>.\iniciar_whatsapp.ps1</code> en <code>proyecto 2\academic-bot</code> o abre <a href="http://localhost:3005" target="_blank" class="underline text-[var(--primary)] font-semibold">http://localhost:3005</a> para escanear el QR desde <strong>WhatsApp → Dispositivos vinculados</strong>.
-            </div>
-            <div class="text-[var(--muted-foreground)]">
-              🔒 <strong>Filtro de privacidad:</strong> Si tu mamá o un amigo te escribe <em>"Hola, ¿cómo vas?"</em>, el bot lo ignora (`reply: None`) y solo contesta cuando envían un comando con <code>/</code>.
-            </div>
-          </div>
-          <a href="http://localhost:3005" target="_blank" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:opacity-90">
-            Abrir Panel QR (:3005) ↗
-          </a>
-        </div>
-
-        <!-- Botones rápidos de comandos de WhatsApp y Telegram -->
-        <div class="flex flex-wrap gap-1.5 my-3">
-          <button onclick="runBotCommand('/start')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:opacity-90">/start</button>
-          <button onclick="runBotCommand('/materias')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:opacity-90">/materias</button>
-          <button onclick="runBotCommand('/tareas')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:opacity-90">/tareas</button>
-          <button onclick="runBotCommand('/pendientes')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:opacity-90">/pendientes (≤7 días)</button>
-          <button onclick="runBotCommand('/recordar 30m Repasar rotación doble AVL')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:opacity-90">/recordar 30m ...</button>
-          <button onclick="runBotCommand('/preguntar ¿Qué complejidad tiene la búsqueda binaria?')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90">/preguntar (RAG IA)</button>
-          <button onclick="runBotCommand('Hola bro, ¿nos vemos en la cafetería de la U?')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 hover:opacity-90">💬 Probar chat personal (WSP)</button>
-        </div>
-
-        <!-- Ventana de mensajes del Bot -->
-        <div id="bot-messages" class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3.5 h-72 overflow-y-auto space-y-3">
-          <!-- Renderizado por JS -->
-        </div>
-
-        <!-- Entrada libre para el Bot -->
-        <form onsubmit="handleBotSubmit(event)" class="mt-3 flex gap-2">
-          <input id="bot-input" type="text" placeholder="Escribe un comando ej: /preguntar ¿Cuáles son los pilares de POO?" class="flex-1 px-3 py-2 rounded-xl text-xs bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] focus:outline-none" />
-          <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
-            Enviar
-          </button>
-        </form>
+        <a class="gh" href="https://github.com/academi-dev/academic-api/blob/main/app/auth/service.py#L72-L105" target="_blank" rel="noopener">Ver en GitHub ↗</a>
       </div>
-
-      <!-- INSPECTOR DE TRÁFICO HTTP / API REST (academic-api & academic-rag) -->
-      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm">
-        <div class="flex items-center justify-between mb-2">
-          <div>
-            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Proyecto 1 & 5 · Trazabilidad REST + JWT</span>
-            <h3 class="text-sm font-bold">Inspector en Vivo de Peticiones HTTP (`academic-api` & `academic-rag`)</h3>
-          </div>
-          <span id="jwt-badge" class="px-2.5 py-1 rounded-md text-xs font-mono bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
-            Bearer eyJhbGciOiJIUzI1Ni...
-          </span>
+      <div class="explain">
+      <p><code>verify_token</code> decodifica el JWT y comprueba tres cosas: que la firma sea válida, que no haya expirado y
+      que el <code>type</code> sea el esperado. Cada error se traduce a una respuesta <code>401</code> con un código
+      legible (<code>TOKEN_EXPIRADO</code>, <code>TOKEN_INVALIDO</code>) en el formato estándar de errores de la API:
+      <code>{"error": {"codigo", "mensaje"}}</code>.</p></div>
+      <pre class="line-numbers" data-start="72"><code class="language-python">def verify_token(token: str, expected_type: str = &quot;access&quot;) -&gt; Dict[str, Any]:
+    &quot;&quot;&quot;
+    Decodifica y valida un token JWT comprobando firma, vigencia y tipo de token.
+    Lanza APIError en caso de token inválido o expirado.
+    &quot;&quot;&quot;
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        token_type = payload.get(&quot;type&quot;)
+        if token_type != expected_type:
+            raise APIError(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                codigo=&quot;TOKEN_INVALIDO&quot;,
+                mensaje=f&quot;Tipo de token incorrecto. Se esperaba &#x27;{expected_type}&#x27;.&quot;
+            )
+        user_id = payload.get(&quot;sub&quot;)
+        if not user_id:
+            raise APIError(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                codigo=&quot;TOKEN_INVALIDO&quot;,
+                mensaje=&quot;El token no contiene un identificador de usuario válido.&quot;
+            )
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise APIError(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            codigo=&quot;TOKEN_EXPIRADO&quot;,
+            mensaje=&quot;El token ha expirado. Por favor inicie sesión nuevamente.&quot;
+        )
+    except jwt.InvalidTokenError:
+        raise APIError(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            codigo=&quot;TOKEN_INVALIDO&quot;,
+            mensaje=&quot;El token proporcionado no es válido.&quot;
+        )</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>4. Protección de rutas con inyección de dependencias</h4>
+          <code class="path">academic-api/app/auth/dependencies.py · líneas 21–71</code>
         </div>
-        <div id="api-logs" class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 h-48 overflow-y-auto font-mono text-xs space-y-2">
-          <!-- Renderizado por JS -->
-        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-api/blob/main/app/auth/dependencies.py#L21-L71" target="_blank" rel="noopener">Ver en GitHub ↗</a>
       </div>
+      <div class="explain">
+      <p><code>get_current_user</code> es una <strong>dependencia de FastAPI</strong>. Cualquier endpoint que declare
+      <code>Depends(get_current_user)</code> queda protegido automáticamente: se lee el header
+      <code>Authorization: Bearer …</code>, se valida el token y se carga el usuario desde la base de datos.</p>
+      <p><code>get_current_admin_user</code> se apoya en la anterior y además exige el rol <code>ADMIN</code>
+      (control de acceso basado en roles, RBAC).</p></div>
+      <pre class="line-numbers" data-start="21"><code class="language-python">def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+) -&gt; User:
+    &quot;&quot;&quot;
+    Dependencia que extrae y valida el JWT del encabezado Authorization.
+    Verifica que el usuario exista en la base de datos y se encuentre activo.
+    &quot;&quot;&quot;
+    payload = verify_token(token, expected_type=&quot;access&quot;)
+    user_id_str = payload.get(&quot;sub&quot;)
 
-    </div>
-  </div>
+    try:
+        user_uuid = uuid.UUID(str(user_id_str))
+    except (ValueError, TypeError):
+        raise APIError(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            codigo=&quot;TOKEN_INVALIDO&quot;,
+            mensaje=&quot;El identificador de usuario en el token tiene un formato inválido.&quot;
+        )
 
-  <!-- SECCIÓN 2: LABORATORIO RAG (academic-rag) -->
-  <div id="section-rag" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-5">
-    <div class="lg:col-span-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 space-y-4">
+    user = db.query(User).filter(User.id == user_uuid).first()
+    if not user:
+        raise APIError(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            codigo=&quot;NO_AUTORIZADO&quot;,
+            mensaje=&quot;El usuario asociado al token no existe.&quot;
+        )
+
+    if not user.is_active:
+        raise APIError(
+            status_code=status.HTTP_403_FORBIDDEN,
+            codigo=&quot;ACCESO_DENEGADO&quot;,
+            mensaje=&quot;La cuenta de usuario se encuentra inactiva.&quot;
+        )
+
+    return user
+
+
+def get_current_admin_user(
+    current_user: User = Depends(get_current_user)
+) -&gt; User:
+    &quot;&quot;&quot;
+    Dependencia que restringe el acceso exclusivamente a usuarios con rol ADMIN.
+    &quot;&quot;&quot;
+    if current_user.rol != UserRole.ADMIN:
+        raise APIError(
+            status_code=status.HTTP_403_FORBIDDEN,
+            codigo=&quot;ACCESO_DENEGADO&quot;,
+            mensaje=&quot;Esta acción requiere privilegios de administrador.&quot;
+        )
+    return current_user</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>5. Registro seguro: el rol no lo decide el cliente</h4>
+          <code class="path">academic-api/app/auth/service.py · líneas 134–159</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-api/blob/main/app/auth/service.py#L134-L159" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>Al registrar se normaliza el correo, se verifica que no exista (<code>409</code> si ya existe) y la contraseña se
+      guarda con <strong>hash bcrypt</strong>, nunca en texto plano.</p>
+      <p>Fíjese en la línea con <code>rol=UserRole.ESTUDIANTE</code>: aunque alguien envíe <code>"rol": "admin"</code>
+      en el JSON, el servidor lo ignora. La prueba de integración verifica justamente este caso.</p></div>
+      <pre class="line-numbers" data-start="134"><code class="language-python">def create_user(db: Session, user_data: RegistroRequest) -&gt; User:
+    &quot;&quot;&quot;
+    Registra un nuevo usuario en la base de datos previa verificación de unicidad de correo.
+    &quot;&quot;&quot;
+    email_clean = user_data.email.lower().strip()
+    existing_user = db.query(User).filter(User.email == email_clean).first()
+    if existing_user:
+        raise APIError(
+            status_code=status.HTTP_409_CONFLICT,
+            codigo=&quot;CORREO_REGISTRADO&quot;,
+            mensaje=&quot;Ya existe una cuenta registrada con este correo electrónico.&quot;
+        )
+
+    new_user = User(
+        id=uuid.uuid4(),
+        email=email_clean,
+        hashed_password=get_password_hash(user_data.password),
+        nombre=user_data.nombre.strip(),
+        rol=UserRole.ESTUDIANTE,
+        is_active=True,
+        created_at=datetime.now(timezone.utc)
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>6. Modelo de datos de una tarea</h4>
+          <code class="path">academic-api/app/tareas/models.py · líneas 29–60</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-api/blob/main/app/tareas/models.py#L29-L60" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>Modelo SQLAlchemy de la tabla <code>tareas</code>. Puntos a notar:</p>
+      <ul>
+        <li>Claves primarias <strong>UUID</strong> (no enteros consecutivos, así no se pueden adivinar IDs).</li>
+        <li><code>prioridad</code> y <code>estado</code> son <strong>enums</strong>: la base de datos solo acepta valores válidos.</li>
+        <li>Dos llaves foráneas con <code>ondelete="CASCADE"</code>: si se borra la materia o el usuario, se borran sus tareas.</li>
+        <li><code>usuario_id</code> está indexado porque <em>todas</em> las consultas filtran por él.</li>
+      </ul></div>
+      <pre class="line-numbers" data-start="29"><code class="language-python">class Tarea(Base):
+    &quot;&quot;&quot;
+    Modelo SQLAlchemy de la entidad Tarea.
+    Representa una actividad o entrega académica vinculada a una materia.
+    &quot;&quot;&quot;
+    __tablename__ = &quot;tareas&quot;
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    titulo = Column(String(200), nullable=False)
+    descripcion = Column(Text, nullable=True)
+    fecha_entrega = Column(DateTime(timezone=True), nullable=True)
+    prioridad = Column(
+        Enum(TareaPrioridad, values_callable=lambda obj: [e.value for e in obj]),
+        default=TareaPrioridad.MEDIA,
+        nullable=False
+    )
+    estado = Column(
+        Enum(TareaEstado, values_callable=lambda obj: [e.value for e in obj]),
+        default=TareaEstado.PENDIENTE,
+        nullable=False
+    )
+    materia_id = Column(GUID, ForeignKey(&quot;materias.id&quot;, ondelete=&quot;CASCADE&quot;), nullable=False, index=True)
+    usuario_id = Column(GUID, ForeignKey(&quot;users.id&quot;, ondelete=&quot;CASCADE&quot;), nullable=False, index=True)
+    created_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False
+    )
+
+    # Relaciones
+    usuario = relationship(&quot;User&quot;, back_populates=&quot;tareas&quot;)
+    materia = relationship(&quot;Materia&quot;, back_populates=&quot;tareas&quot;)</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>7. Aislamiento entre usuarios y filtros</h4>
+          <code class="path">academic-api/app/tareas/service.py · líneas 17–64</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-api/blob/main/app/tareas/service.py#L17-L64" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>Aquí está la regla de seguridad más importante del negocio: <strong>cada consulta empieza filtrando por
+      <code>usuario_id</code></strong>. Un estudiante nunca puede listar, ver ni borrar tareas de otro.</p>
+      <p><code>_validar_materia_propietario</code> impide además crear una tarea dentro de una materia ajena. Los filtros
+      opcionales (materia, estado, rango de fechas) se encadenan sobre la misma consulta y al final se aplica
+      paginación con <code>limite</code> y <code>desplazamiento</code>.</p></div>
+      <pre class="line-numbers" data-start="17"><code class="language-python">def _validar_materia_propietario(db: Session, materia_id: uuid.UUID, usuario_id: uuid.UUID) -&gt; Materia:
+    &quot;&quot;&quot;
+    Valida que la materia exista y pertenezca al usuario solicitante.
+    &quot;&quot;&quot;
+    materia = db.query(Materia).filter(
+        Materia.id == materia_id,
+        Materia.usuario_id == usuario_id
+    ).first()
+    if not materia:
+        raise APIError(
+            status_code=status.HTTP_404_NOT_FOUND,
+            codigo=&quot;RECURSO_NO_ENCONTRADO&quot;,
+            mensaje=f&quot;La materia con ID &#x27;{materia_id}&#x27; no existe o no pertenece al usuario.&quot;
+        )
+    return materia
+
+
+def get_tareas(
+    db: Session,
+    usuario_id: uuid.UUID,
+    materia_id: Optional[uuid.UUID] = None,
+    estado: Optional[TareaEstado] = None,
+    fecha_inicio: Optional[datetime] = None,
+    fecha_fin: Optional[datetime] = None,
+    limite: int = 10,
+    desplazamiento: int = 0
+) -&gt; Tuple[List[Tarea], int]:
+    &quot;&quot;&quot;
+    Lista las tareas del usuario aplicando filtros opcionales de materia, estado y rango de fechas.
+    Retorna una tupla (lista_tareas, total_registros).
+    &quot;&quot;&quot;
+    query = db.query(Tarea).filter(Tarea.usuario_id == usuario_id)
+
+    if materia_id is not None:
+        query = query.filter(Tarea.materia_id == materia_id)
+
+    if estado is not None:
+        query = query.filter(Tarea.estado == estado)
+
+    if fecha_inicio is not None:
+        query = query.filter(Tarea.fecha_entrega &gt;= fecha_inicio)
+
+    if fecha_fin is not None:
+        query = query.filter(Tarea.fecha_entrega &lt;= fecha_fin)
+
+    total = query.count()
+    tareas = query.order_by(Tarea.fecha_entrega.asc(), Tarea.created_at.desc()).offset(desplazamiento).limit(limite).all()
+    return tareas, total</code></pre>
+    </article>
+  </section>
+  <section id="rag">
+    <div class="sec-head">
+      <span class="num">2</span>
       <div>
-        <span class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">Proyecto 5 · POST /api/v1/documentos</span>
-        <h2 class="text-base font-bold mt-0.5">Documentos PDF Indexados en ChromaDB</h2>
-        <p class="text-xs text-[var(--muted-foreground)]">Cada PDF se divide en fragmentos con solapamiento preservando página y posición.</p>
-      </div>
-
-      <div id="rag-docs-list" class="space-y-2.5"></div>
-
-      <div class="border border-dashed border-[var(--border)] rounded-xl p-3.5 space-y-2">
-        <div class="text-xs font-semibold">Simular subida de nuevo apunte PDF</div>
-        <input id="new-pdf-name" type="text" value="apuntes_bases_datos_relacionales.pdf" class="w-full px-3 py-1.5 rounded-lg text-xs bg-[var(--background)] border border-[var(--border)]" />
-        <textarea id="new-pdf-text" rows="2" class="w-full px-3 py-1.5 rounded-lg text-xs bg-[var(--background)] border border-[var(--border)]">Página 1: Una clave foránea (Foreign Key) garantiza la integridad referencial entre dos tablas en PostgreSQL. Las transacciones cumplen ACID (Atomicidad, Consistencia, Aislamiento y Durabilidad).</textarea>
-        <button onclick="uploadSimulatedPdf()" class="w-full py-2 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
-          Subir, Fragmentar y Vectorizar PDF
-        </button>
+        <h2>academic-rag — Preguntas sobre los apuntes (IA)</h2>
+        <a class="gh" href="https://github.com/academi-dev/academic-rag" target="_blank" rel="noopener">github.com/academi-dev/academic-rag ↗</a>
       </div>
     </div>
+    <div class="intro">
+          <p><strong>Qué hace:</strong> recibe apuntes en PDF, los divide en fragmentos y los indexa. Cuando el estudiante
+          pregunta algo, busca los fragmentos más parecidos y responde <strong>citando documento y página</strong>.</p>
+          <p><strong>Tecnologías:</strong> FastAPI, PyPDF2, ChromaDB, sentence-transformers, OpenAI (opcional).</p>
+          <p><strong>Recorrido sugerido:</strong> ingesta del PDF (1–3) → almacenamiento (4–5) → consulta y respuesta (6–7).</p></div>
+    <details class="tree"><summary>Estructura de carpetas</summary><pre>academic-rag/
+├── app/
+│   ├── main.py            # App FastAPI y /api/v1/health
+│   ├── config.py          # chunk_size, overlap, modelo de embeddings, proveedor LLM
+│   ├── vector_store.py    # ChromaDB o respaldo local con la misma interfaz
+│   ├── documentos/        # processor (PDF → fragmentos) · service · router (subir/listar/borrar)
+│   └── preguntas/         # service (búsqueda + respuesta con citas) · router (/preguntar)
+├── data/generar_pdf_ejemplo.py
+└── tests/                 # 13 pruebas (documentos, preguntas)</pre></details>
+    
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>1. Extraer el texto del PDF página por página</h4>
+          <code class="path">academic-rag/app/documentos/processor.py · líneas 69–92</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-rag/blob/main/app/documentos/processor.py#L69-L92" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>Para poder citar la página exacta, el texto <strong>no</strong> se extrae como un bloque único: se recorre cada página
+      con PyPDF2 y se guarda junto a su número (empezando en 1, como lo lee una persona). Si el PDF no tiene texto
+      legible (por ejemplo, un escaneo sin OCR) se rechaza con un error claro.</p></div>
+      <pre class="line-numbers" data-start="69"><code class="language-python">        try:
+            reader = PyPDF2.PdfReader(stream)
+            total_pages = len(reader.pages)
+            pages_data: List[Dict[str, Any]] = []
 
-    <div class="lg:col-span-7 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 space-y-4">
+            for page_index in range(total_pages):
+                page = reader.pages[page_index]
+                text = page.extract_text() or &quot;&quot;
+                clean_text = text.strip()
+
+                if clean_text:
+                    pages_data.append({
+                        &quot;pagina&quot;: page_index + 1,  # 1-indexado para citación humana
+                        &quot;texto&quot;: clean_text,
+                    })
+
+            if not pages_data:
+                raise ValueError(&quot;El archivo PDF no contiene texto legible o está vacío.&quot;)
+
+            return pages_data
+        except Exception as e:
+            if isinstance(e, ValueError):
+                raise e
+            raise ValueError(f&quot;Error al analizar el archivo PDF: {str(e)}&quot;) from e</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>2. Fragmentación (chunking) con solapamiento</h4>
+          <code class="path">academic-rag/app/documentos/processor.py · líneas 97–133</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-rag/blob/main/app/documentos/processor.py#L97-L133" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>Cada página se divide en fragmentos de máximo <code>chunk_size</code> caracteres (500). Entre fragmentos consecutivos
+      se repiten <code>chunk_overlap</code> caracteres (50) para que una idea que queda partida entre dos fragmentos no se
+      pierda.</p>
+      <p>Si LangChain está instalado se usa su <code>RecursiveCharacterTextSplitter</code>; si no, este algoritmo propio
+      intenta cortar en un espacio o punto para no partir palabras.</p></div>
+      <pre class="line-numbers" data-start="97"><code class="language-python">    def _split_text_fallback(self, text: str) -&gt; List[str]:
+        &quot;&quot;&quot;Algoritmo de respaldo para división de texto cuando LangChain no está disponible.
+
+        Args:
+            text: Cadena de texto a fragmentar.
+
+        Returns:
+            List[str]: Lista de fragmentos respetando chunk_size y chunk_overlap.
+        &quot;&quot;&quot;
+        if len(text) &lt;= self.chunk_size:
+            return [text]
+
+        chunks: List[str] = []
+        start = 0
+        text_len = len(text)
+
+        while start &lt; text_len:
+            end = start + self.chunk_size
+            chunk = text[start:end]
+
+            # Intentar cortar por el último espacio o punto si no estamos al final
+            if end &lt; text_len:
+                last_space = chunk.rfind(&quot; &quot;)
+                last_period = chunk.rfind(&quot;. &quot;)
+                break_point = max(last_space, last_period)
+                if break_point &gt; int(self.chunk_size * 0.5):
+                    chunk = chunk[: break_point + 1]
+                    end = start + len(chunk)
+
+            chunk_clean = chunk.strip()
+            if chunk_clean:
+                chunks.append(chunk_clean)
+
+            step = len(chunk) - self.chunk_overlap
+            start += max(1, step)
+
+        return chunks</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>3. Cada fragmento conserva su página</h4>
+          <code class="path">academic-rag/app/documentos/processor.py · líneas 148–187</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-rag/blob/main/app/documentos/processor.py#L148-L187" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>El resultado es una lista de fragmentos con <code>pagina</code>, <code>posicion</code> y <code>texto</code>. Estos
+      metadatos viajan con el fragmento a la base vectorial y son los que permiten responder
+      “esto está en la página 2 de apuntes.pdf”.</p></div>
+      <pre class="line-numbers" data-start="148"><code class="language-python">    def process_pages_to_chunks(
+        self, pages_data: List[Dict[str, Any]]
+    ) -&gt; List[Dict[str, Any]]:
+        &quot;&quot;&quot;Transforma una lista de páginas en una lista de fragmentos con metadatos asociados.
+
+        Args:
+            pages_data: Lista de páginas obtenida con `extract_text_by_page`.
+
+        Returns:
+            List[Dict[str, Any]]: Fragmentos resultantes con la siguiente estructura:
+                [
+                    {
+                        &quot;pagina&quot;: int,
+                        &quot;posicion&quot;: int,
+                        &quot;texto&quot;: str
+                    },
+                    ...
+                ]
+        &quot;&quot;&quot;
+        chunks_result: List[Dict[str, Any]] = []
+        global_position = 0
+
+        for page_item in pages_data:
+            page_number = page_item[&quot;pagina&quot;]
+            page_text = page_item[&quot;texto&quot;]
+
+            text_chunks = self.chunk_text(page_text)
+            for chunk_content in text_chunks:
+                clean_chunk = chunk_content.strip()
+                if not clean_chunk:
+                    continue
+
+                chunks_result.append({
+                    &quot;pagina&quot;: page_number,
+                    &quot;posicion&quot;: global_position,
+                    &quot;texto&quot;: clean_chunk,
+                })
+                global_position += 1
+
+        return chunks_result</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>4. Base vectorial: ChromaDB o respaldo local</h4>
+          <code class="path">academic-rag/app/vector_store.py · líneas 192–227</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-rag/blob/main/app/vector_store.py#L192-L227" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>En Docker (Python 3.11) se usa <strong>ChromaDB</strong> con embeddings de <code>sentence-transformers</code>
+      (modelo <code>all-MiniLM-L6-v2</code>). En el equipo de desarrollo (Python 3.15 en Windows) esas librerías no tienen
+      versiones compiladas, así que se activa automáticamente <code>LocalPersistentCollection</code>, que tiene
+      <strong>la misma interfaz</strong> (<code>add</code>, <code>query</code>, <code>delete</code>, <code>count</code>).
+      El resto del código no sabe cuál de las dos está usando.</p></div>
+      <pre class="line-numbers" data-start="192"><code class="language-python">def create_vector_collection(settings: Settings) -&gt; Any:
+    &quot;&quot;&quot;Inicializa y retorna una colección vectorial ChromaDB o el respaldo persistente local.&quot;&quot;&quot;
+    Path(settings.chroma_persist_dir).mkdir(parents=True, exist_ok=True)
+    try:
+        import chromadb  # type: ignore
+        from chromadb.config import Settings as ChromaSettings  # type: ignore
+        from chromadb.utils import embedding_functions  # type: ignore
+
+        if not hasattr(chromadb, &quot;PersistentClient&quot;):
+            raise RuntimeError(&quot;La versión instalada de chromadb no soporta PersistentClient.&quot;)
+
+        client = chromadb.PersistentClient(
+            path=settings.chroma_persist_dir,
+            settings=ChromaSettings(anonymized_telemetry=False),
+        )
+
+        try:
+            embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
+                model_name=settings.embedding_model
+            )
+        except Exception:
+            embedding_fn = embedding_functions.DefaultEmbeddingFunction()
+
+        collection = client.get_or_create_collection(
+            name=settings.collection_name,
+            embedding_function=embedding_fn,
+            metadata={&quot;description&quot;: &quot;Índice de fragmentos académicos&quot;},
+        )
+        # Verificar que la colección sea operativa
+        _ = collection.count()
+        return collection
+    except Exception:
+        return LocalPersistentCollection(
+            persist_dir=settings.chroma_persist_dir,
+            collection_name=settings.collection_name,
+        )</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>5. Cómo compara textos el respaldo local</h4>
+          <code class="path">academic-rag/app/vector_store.py · líneas 40–72</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-rag/blob/main/app/vector_store.py#L40-L72" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>El respaldo convierte cada texto en un vector disperso: palabras sin tildes ni <em>stopwords</em>, más prefijos de 4 y
+      5 letras para captar variaciones (“complejidad” / “complejo”). Luego compara con <strong>similitud coseno</strong>.</p>
+      <p>Es una búsqueda <em>léxica</em> (por palabras), no semántica como la de ChromaDB con embeddings. Lo dejamos
+      explícito en la sección de retroalimentación.</p></div>
+      <pre class="line-numbers" data-start="40"><code class="language-python">def _vectorize(text: str) -&gt; Dict[str, float]:
+    &quot;&quot;&quot;Convierte un texto en un vector disperso L2-normalizado de palabras y n-gramas.&quot;&quot;&quot;
+    norm = _normalize_text(text)
+    words = [w for w in re.findall(r&quot;[a-z0-9]+&quot;, norm) if len(w) &gt;= 2 and w not in _STOPWORDS_ES]
+    counts: Counter[str] = Counter()
+    for w in words:
+        counts[f&quot;w:{w}&quot;] += 2.0
+        if len(w) &gt;= 4:
+            # Prefijos/raíces para capturar variaciones morfológicas
+            counts[f&quot;p:{w[:4]}&quot;] += 1.0
+        if len(w) &gt;= 5:
+            counts[f&quot;p:{w[:5]}&quot;] += 1.0
+
+    if not counts:
+        # Fallback para textos muy cortos
+        for token in re.findall(r&quot;[a-z0-9]+&quot;, norm):
+            counts[f&quot;w:{token}&quot;] += 1.0
+
+    norm_sq = sum(v * v for v in counts.values())
+    if norm_sq &lt;= 0:
+        return {}
+    inv_norm = 1.0 / math.sqrt(norm_sq)
+    return {k: v * inv_norm for k, v in counts.items()}
+
+
+def _cosine_similarity(vec_a: Dict[str, float], vec_b: Dict[str, float]) -&gt; float:
+    &quot;&quot;&quot;Calcula la similitud coseno entre dos vectores dispersos L2-normalizados.&quot;&quot;&quot;
+    if not vec_a or not vec_b:
+        return 0.0
+    if len(vec_a) &gt; len(vec_b):
+        vec_a, vec_b = vec_b, vec_a
+    dot = sum(val * vec_b.get(key, 0.0) for key, val in vec_a.items())
+    return max(0.0, min(1.0, dot))</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>6. Recuperar los fragmentos más relevantes</h4>
+          <code class="path">academic-rag/app/preguntas/service.py · líneas 32–96</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-rag/blob/main/app/preguntas/service.py#L32-L96" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>Se consulta la colección con la pregunta y se piden los <code>top_k</code> fragmentos más cercanos (se puede filtrar
+      por un documento específico). La distancia se convierte en un puntaje de relevancia entre 0 y 1, y cada resultado
+      se empaqueta como una <code>Cita</code> con documento, página y texto.</p></div>
+      <pre class="line-numbers" data-start="32"><code class="language-python">    def retrieve_relevant_chunks(
+        self, pregunta: str, top_k: int = 3, documento_id: Optional[str] = None
+    ) -&gt; List[Cita]:
+        &quot;&quot;&quot;Consulta ChromaDB para encontrar los fragmentos más afines a la pregunta.
+
+        Args:
+            pregunta: Consulta del usuario en lenguaje natural.
+            top_k: Número de fragmentos a recuperar.
+            documento_id: Filtro opcional por ID de documento específico.
+
+        Returns:
+            List[Cita]: Lista ordenada de citas con metadatos de documento y página.
+        &quot;&quot;&quot;
+        count = self.collection.count()
+        if count == 0:
+            return []
+
+        where_filter: Optional[Dict[str, Any]] = None
+        if documento_id:
+            where_filter = {&quot;documento_id&quot;: documento_id}
+
+        # Ajustar n_results si hay menos fragmentos indexados que top_k
+        n_results = min(top_k, count)
+        if n_results &lt;= 0:
+            return []
+
+        try:
+            results = self.collection.query(
+                query_texts=[pregunta],
+                n_results=n_results,
+                where=where_filter,
+                include=[&quot;documents&quot;, &quot;metadatas&quot;, &quot;distances&quot;],
+            )
+        except Exception:
+            return []
+
+        citas: List[Cita] = []
+        if not results or not results.get(&quot;documents&quot;) or not results[&quot;documents&quot;][0]:
+            return citas
+
+        documents_list = results[&quot;documents&quot;][0]
+        metadatas_list = results.get(&quot;metadatas&quot;, [[]])[0]
+        distances_list = results.get(&quot;distances&quot;, [[]])[0]
+
+        for i, text in enumerate(documents_list):
+            meta = metadatas_list[i] if i &lt; len(metadatas_list) else {}
+            dist = distances_list[i] if distances_list and i &lt; len(distances_list) else None
+
+            # Calcular score de relevancia normalizado a partir de distancia
+            relevancia: Optional[float] = None
+            if dist is not None:
+                relevancia = round(max(0.0, 1.0 - float(dist)), 4)
+
+            citas.append(
+                Cita(
+                    pagina=int(meta.get(&quot;pagina&quot;, 1)),
+                    texto=text,
+                    documento=str(meta.get(&quot;nombre_archivo&quot;, &quot;apuntes.pdf&quot;)),
+                    documento_id=meta.get(&quot;documento_id&quot;),
+                    posicion=meta.get(&quot;posicion&quot;),
+                    relevancia=relevancia,
+                )
+            )
+
+        return citas</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>7. Armar la respuesta (local u OpenAI)</h4>
+          <code class="path">academic-rag/app/preguntas/service.py · líneas 185–231</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-rag/blob/main/app/preguntas/service.py#L185-L231" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>Por defecto (<code>LLM_PROVIDER=local</code>) la respuesta se construye <strong>directamente con los fragmentos
+      encontrados</strong> y sus citas: no se inventa nada, pero tampoco se redacta un resumen.</p>
+      <p>Si se configura <code>OPENAI_API_KEY</code>, los fragmentos se envían como contexto a un modelo con instrucciones de
+      responder solo con esa información y citar la página. Si OpenAI falla, se vuelve automáticamente al modo local.</p></div>
+      <pre class="line-numbers" data-start="185"><code class="language-python">    def responder(self, request: PreguntaRequest) -&gt; RespuestaResponse:
+        &quot;&quot;&quot;Atiende la solicitud de consulta completa: búsqueda semántica y generación de respuesta.
+
+        Args:
+            request: Parámetros de la pregunta (texto, documento opcional, top_k).
+
+        Returns:
+            RespuestaResponse: Objeto con la respuesta y lista estructurada de citas.
+        &quot;&quot;&quot;
+        citas = self.retrieve_relevant_chunks(
+            pregunta=request.pregunta,
+            top_k=request.top_k,
+            documento_id=request.documento_id,
+        )
+
+        if not citas:
+            return RespuestaResponse(
+                pregunta=request.pregunta,
+                respuesta=(
+                    &quot;No se encontró información relevante en los apuntes indexados para responder &quot;
+                    &quot;a la pregunta. Verifica que el apunte esté subido correctamente.&quot;
+                ),
+                citas=[],
+                total_citas=0,
+                proveedor_llm=self.settings.llm_provider,
+            )
+
+        # Determinar generador según configuración
+        proveedor_utilizado = &quot;local&quot;
+        respuesta_texto: Optional[str] = None
+
+        if self.settings.llm_provider.lower() == &quot;openai&quot; and self.settings.openai_api_key:
+            respuesta_texto = self._generate_openai_answer(request.pregunta, citas)
+            if respuesta_texto:
+                proveedor_utilizado = &quot;openai&quot;
+
+        if not respuesta_texto:
+            respuesta_texto = self._generate_local_answer(request.pregunta, citas)
+            proveedor_utilizado = &quot;local&quot;
+
+        return RespuestaResponse(
+            pregunta=request.pregunta,
+            respuesta=respuesta_texto,
+            citas=citas,
+            total_citas=len(citas),
+            proveedor_llm=proveedor_utilizado,
+        )</code></pre>
+    </article>
+  </section>
+  <section id="bot">
+    <div class="sec-head">
+      <span class="num">3</span>
       <div>
-        <span class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">Proyecto 5 · POST /api/v1/preguntar</span>
-        <h2 class="text-base font-bold mt-0.5">Buscador Semántico con Citas Verificables</h2>
-        <p class="text-xs text-[var(--muted-foreground)]">Haz clic en una pregunta de prueba o escribe la tuya para consultar los fragmentos vectorizados:</p>
-      </div>
-
-      <div class="flex flex-wrap gap-2">
-        <button onclick="askRagStudio('¿Cuáles son los 4 pilares de la Programación Orientada a Objetos?')" class="px-3 py-1.5 rounded-xl text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
-          ¿Pilares de la POO?
-        </button>
-        <button onclick="askRagStudio('¿Qué complejidad tiene la búsqueda binaria y MergeSort?')" class="px-3 py-1.5 rounded-xl text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
-          ¿Complejidad de búsqueda binaria?
-        </button>
-        <button onclick="askRagStudio('¿Qué garantiza una clave foránea y qué significa ACID?')" class="px-3 py-1.5 rounded-xl text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
-          ¿Clave foránea y ACID?
-        </button>
-      </div>
-
-      <form onsubmit="handleRagStudioSubmit(event)" class="flex gap-2">
-        <input id="rag-studio-input" type="text" placeholder="Escribe tu pregunta sobre los apuntes..." class="flex-1 px-3.5 py-2 rounded-xl text-xs bg-[var(--background)] border border-[var(--border)]" />
-        <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
-          Consultar RAG
-        </button>
-      </form>
-
-      <div id="rag-studio-output" class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-4 space-y-3">
-        <!-- Renderizado por JS -->
+        <h2>academic-bot — Bot de WhatsApp y Telegram</h2>
+        <a class="gh" href="https://github.com/academi-dev/academic-bot" target="_blank" rel="noopener">github.com/academi-dev/academic-bot ↗</a>
       </div>
     </div>
-  </div>
-
-  <!-- SECCIÓN 3: ORQUESTADOR DOCKER & SUITE DE PRUEBAS (academic-platform) -->
-  <div id="section-platform" class="hidden space-y-5">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-      <div class="lg:col-span-6 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 space-y-3">
-        <span class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">Proyecto 4 · academic-platform</span>
-        <h2 class="text-base font-bold">Topología de Red Docker (`academic-net`) y Gateway Nginx</h2>
-        <div class="space-y-2 text-xs">
-          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] flex justify-between items-center">
-            <div>
-              <div class="font-bold">1. academic-gateway (nginx:1.25-alpine)</div>
-              <div class="text-[var(--muted-foreground)]">Enruta `/api/*` → `academic-api:8000` y `/rag/*` → `academic-rag:8000`</div>
-            </div>
-            <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-mono">0.0.0.0:80</span>
-          </div>
-          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] flex justify-between items-center">
-            <div>
-              <div class="font-bold">2. academic-api (FastAPI + SQLAlchemy + Alembic)</div>
-              <div class="text-[var(--muted-foreground)]">Auth JWT, RBAC, Materias y Tareas · Healthcheck `GET /health`</div>
-            </div>
-            <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-mono">:8000</span>
-          </div>
-          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] flex justify-between items-center">
-            <div>
-              <div class="font-bold">3. academic-postgres (postgres:16-alpine)</div>
-              <div class="text-[var(--muted-foreground)]">Volumen persistente `academic_postgres_data` · `pg_isready`</div>
-            </div>
-            <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-mono">:5432</span>
-          </div>
-          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] flex justify-between items-center">
-            <div>
-              <div class="font-bold">4. academic-rag (FastAPI + ChromaDB + PyPDF2)</div>
-              <div class="text-[var(--muted-foreground)]">Volumen `academic_chroma_data` · Healthcheck `GET /api/v1/health`</div>
-            </div>
-            <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-mono">:8001→8000</span>
-          </div>
-          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] flex justify-between items-center">
-            <div>
-              <div class="font-bold">5. academic-bot (python-telegram-bot + APScheduler)</div>
-              <div class="text-[var(--muted-foreground)]">Consume `http://academic-api:8000/api/v1` y `http://academic-rag:8000/api/v1`</div>
-            </div>
-            <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-mono">worker</span>
-          </div>
+    <div class="intro">
+          <p><strong>Qué hace:</strong> permite consultar materias y tareas, programar recordatorios y preguntar a los apuntes
+          desde WhatsApp (vinculado por QR) o Telegram. Toda la lógica está en Python; Node.js solo hace de conector con WhatsApp.</p>
+          <p><strong>Tecnologías:</strong> Python (python-telegram-bot, httpx), Node.js (@whiskeysockets/baileys).</p>
+          <p><strong>Recorrido sugerido:</strong> el mensaje entra por Node.js (1), cruza el puente (2–3), se procesa (4–5) y
+          consulta la API (6).</p></div>
+    <details class="tree"><summary>Estructura de carpetas</summary><pre>academic-bot/
+├── bot/
+│   ├── main.py            # Arranque del bot de Telegram (polling)
+│   ├── handlers/          # Comandos de Telegram: start, auth, materias, tareas, recordatorios, preguntas
+│   ├── services/          # api_client (academic-api) · rag_client (academic-rag)
+│   ├── utils/             # auth_storage (sesiones en memoria) · formatters (mensajes)
+│   └── whatsapp/          # processor (lógica de comandos) · bridge_cli (puente STDIO)
+├── whatsapp_qr/index.js   # Conector WhatsApp (Baileys + QR + panel web :3005)
+├── Dockerfile / Dockerfile.whatsapp
+└── tests/                 # 34 pruebas (formateadores, WhatsApp)</pre></details>
+    
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>1. Recibir mensajes de WhatsApp (Node.js + Baileys)</h4>
+          <code class="path">academic-bot/whatsapp_qr/index.js · líneas 143–188</code>
         </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-bot/blob/main/whatsapp_qr/index.js#L143-L188" target="_blank" rel="noopener">Ver en GitHub ↗</a>
       </div>
+      <div class="explain">
+      <p>Este proceso Node.js se vincula a WhatsApp como <strong>dispositivo vinculado</strong> (igual que WhatsApp Web) al
+      escanear el código QR. Por cada mensaje nuevo:</p>
+      <ul>
+        <li>Ignora estados y grupos.</li>
+        <li>Si el mensaje lo envió el mismo teléfono y no empieza por <code>/</code>, lo ignora (para no responderse a sí mismo).</li>
+        <li>Envía el texto al motor en Python y responde con lo que este devuelva.</li>
+        <li>Si la respuesta trae un recordatorio, lo agenda con <code>setTimeout</code>.</li>
+      </ul></div>
+      <pre class="line-numbers" data-start="143"><code class="language-javascript">  sock.ev.on(&quot;messages.upsert&quot;, async ({ messages, type }) =&gt; {
+    if (type !== &quot;notify&quot;) return;
 
-      <div class="lg:col-span-6 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 space-y-3">
-        <span class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">Resultados Reales de Ejecución</span>
-        <h2 class="text-base font-bold">Resumen de Pruebas Automatizadas (111 Verificaciones Totales)</h2>
-        <div class="grid grid-cols-2 gap-3 text-xs">
-          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)]">
-            <div class="text-[var(--muted-foreground)]">Suite 1 · academic-api</div>
-            <div class="text-base font-bold text-emerald-500 mt-0.5">23 / 23 PASSED</div>
-            <div class="text-[var(--muted-foreground)] mt-1">Auth JWT, RBAC seguro, CRUD Materias y Tareas</div>
-          </div>
-          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)]">
-            <div class="text-[var(--muted-foreground)]">Suite 2 · academic-bot (WSP + TG)</div>
-            <div class="text-base font-bold text-emerald-500 mt-0.5">34 / 34 PASSED</div>
-            <div class="text-[var(--muted-foreground)] mt-1">WhatsApp QR, filtro chats personales, Telegram</div>
-          </div>
-          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)]">
-            <div class="text-[var(--muted-foreground)]">Suite 3 · academic-rag</div>
-            <div class="text-base font-bold text-emerald-500 mt-0.5">13 / 13 PASSED</div>
-            <div class="text-[var(--muted-foreground)] mt-1">Subida PDF, chunking, citas por página y filtros</div>
-          </div>
-          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)]">
-            <div class="text-[var(--muted-foreground)]">Suite 4 · Integración E2E Unificada</div>
-            <div class="text-base font-bold text-emerald-500 mt-0.5">41 / 41 OK</div>
-            <div class="text-[var(--muted-foreground)] mt-1">API + RAG + WhatsApp QR + Telegram + Mobile</div>
-          </div>
-        </div>
+    for (const msg of messages) {
+      if (!msg.message) continue;
+      const remoteJid = msg.key.remoteJid || &quot;&quot;;
+      if (remoteJid === &quot;status@broadcast&quot; || remoteJid.endsWith(&quot;@g.us&quot;)) continue;
 
-        <!-- Consola interactiva para correr las 41 verificaciones E2E en vivo en la pantalla -->
-        <div class="pt-2 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold">Simulador de `scripts/prueba_integracion.py` (41 Aserciones)</span>
-            <button onclick="runInteractiveE2ESuite()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90">
-              ▶ Ejecutar 41 Pruebas E2E Ahora
-            </button>
-          </div>
-          <div id="e2e-console-output" class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 h-48 overflow-y-auto font-mono text-xs space-y-1">
-            <div class="text-[var(--muted-foreground)]">Haz clic en "▶ Ejecutar 41 Pruebas E2E Ahora" para ver la corrida paso a paso...</div>
-          </div>
+      const text =
+        msg.message.conversation ||
+        msg.message.extendedTextMessage?.text ||
+        &quot;&quot;;
+
+      if (!text.trim()) continue;
+
+      // Si el mensaje lo envió el mismo teléfono vinculado, solo responder si empieza con &quot;/&quot;
+      if (msg.key.fromMe &amp;&amp; !text.trim().startsWith(&quot;/&quot;)) continue;
+
+      console.log(`📩 [WhatsApp ${remoteJid}]: ${text}`);
+      const res = await askPythonProcessor(remoteJid, text);
+
+      if (res &amp;&amp; res.reply) {
+        await sock.sendMessage(remoteJid, { text: res.reply });
+        messageHistory.unshift({
+          time: new Date().toLocaleTimeString(),
+          sender: remoteJid.split(&quot;@&quot;)[0],
+          input: text,
+          reply: res.reply,
+        });
+        if (messageHistory.length &gt; 25) messageHistory.pop();
+      }
+
+      // Si el usuario programó un recordatorio con /recordar, agendar el envío en WhatsApp
+      if (res &amp;&amp; res.reminder &amp;&amp; res.reminder.delay_seconds) {
+        const delayMs = res.reminder.delay_seconds * 1000;
+        const reminderText = res.reminder.text;
+        setTimeout(async () =&gt; {
+          try {
+            await sock.sendMessage(remoteJid, { text: reminderText });
+          } catch (err) {
+            console.error(&quot;Error enviando recordatorio en WhatsApp:&quot;, err.message);
+          }
+        }, delayMs);
+      }
+    }
+  });</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>2. Puente Node.js → Python por STDIO</h4>
+          <code class="path">academic-bot/whatsapp_qr/index.js · líneas 45–91</code>
         </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-bot/blob/main/whatsapp_qr/index.js#L45-L91" target="_blank" rel="noopener">Ver en GitHub ↗</a>
       </div>
-    </div>
-  </div>
+      <div class="explain">
+      <p>En lugar de reescribir la lógica en JavaScript, Node.js lanza el motor Python como <strong>proceso hijo</strong> y se
+      comunican por la entrada/salida estándar con <strong>una línea JSON por mensaje</strong>. Cada petición lleva un
+      <code>id</code> para emparejar la respuesta correcta aunque lleguen varios mensajes a la vez. Si Python se cae, se
+      reinicia solo a los 2 segundos.</p></div>
+      <pre class="line-numbers" data-start="45"><code class="language-javascript">let pyProc = null;
+let reqCounter = 0;
+const pendingRequests = new Map();
 
-  <script>
-    // Estado compartido en vivo entre el Celular Android, el Bot de Telegram, el RAG y la API
-    const state = {
-      user: {
-        id: "9c8b1d4a-4e21-4a7a-9b10-001122334455",
-        nombre: "Jean Mena",
-        email: "jean.mena@ucp.edu.co",
-        rol: "estudiante"
-      },
-      phoneScreen: "materias",
-      selectedMateriaFilter: "todas",
-      selectedEstadoFilter: "todas",
-      selectedTareaId: null,
-      materias: [
-        {
-          id: "mat-1",
-          nombre: "Estructuras de Datos",
-          codigo: "IS-301",
-          semestre: "2026-2",
-          descripcion: "Árboles balanceados AVL, tablas hash y grafos.",
-          profesor: "Ing. Carlos Gómez"
-        },
-        {
-          id: "mat-2",
-          nombre: "Ingeniería de Software II",
-          codigo: "IS-402",
-          semestre: "2026-2",
-          descripcion: "Arquitectura de microservicios, Docker, CI/CD y pruebas.",
-          profesor: "MSc. Laura Restrepo"
-        },
-        {
-          id: "mat-3",
-          nombre: "Inteligencia Artificial",
-          codigo: "IS-501",
-          semestre: "2026-2",
-          descripcion: "Embeddings vectoriales, búsqueda semántica y sistemas RAG.",
-          profesor: "Dr. Andrés Pineda"
-        }
-      ],
-      tareas: [
-        {
-          id: "tar-1",
-          titulo: "Implementar rotaciones de Árbol AVL",
-          descripcion: "Entregar código y pruebas unitarias de inserción y balanceo.",
-          fecha_entrega: "2026-11-01T23:59:00Z",
-          prioridad: "alta",
-          estado: "pendiente",
-          materia_id: "mat-1"
-        },
-        {
-          id: "tar-2",
-          titulo: "Desplegar contenedor Docker con FastAPI",
-          descripcion: "Configurar Dockerfile multi-stage y healthcheck.",
-          fecha_entrega: "2026-11-03T18:00:00Z",
-          prioridad: "media",
-          estado: "en_progreso",
-          materia_id: "mat-2"
-        },
-        {
-          id: "tar-3",
-          titulo: " Evaluar embeddings en ChromaDB",
-          descripcion: "Comparar precisión top-k con citas de página.",
-          fecha_entrega: "2026-11-05T14:00:00Z",
-          prioridad: "alta",
-          estado: "completada",
-          materia_id: "mat-3"
-        }
-      ],
-      ragDocs: [
-        {
-          id: "a1b2c3d4-1111-4000-8000-000000000001",
-          nombre_archivo: "ejemplo_apuntes.pdf",
-          total_paginas: 2,
-          total_fragmentos: 4,
-          chunks: [
-            {
-              pagina: 1,
-              texto: "La Programación Orientada a Objetos (POO) es un paradigma basado en objetos. Sus 4 pilares fundamentales son: 1. Encapsulamiento (ocultar el estado interno), 2. Abstracción, 3. Herencia y 4. Polimorfismo."
-            },
-            {
-              pagina: 2,
-              texto: "Complejidad Algorítmica y Notación Big O: O(1) acceso constante, O(log n) búsqueda binaria en listas ordenadas, O(n) recorrido lineal, O(n log n) MergeSort y QuickSort, O(n^2) BubbleSort."
-            }
-          ]
-        }
-      ],
-      apiLogs: [],
-      botMessages: []
-    };
+function startPythonBridge() {
+  const pythonBin = resolvePythonBin();
+  pyProc = spawn(pythonBin, [&quot;-m&quot;, &quot;bot.whatsapp.bridge_cli&quot;], {
+    cwd: PROJECT_ROOT,
+    env: { ...process.env, PYTHONIOENCODING: &quot;utf-8&quot; },
+    stdio: [&quot;pipe&quot;, &quot;pipe&quot;, &quot;inherit&quot;],
+  });
 
-    function logApi(method, path, status, summary) {
-      const time = new Date().toLocaleTimeString("es-CO", { hour12: false });
-      state.apiLogs.unshift({ time, method, path, status, summary });
-      renderApiLogs();
-    }
+  let buffer = &quot;&quot;;
+  pyProc.stdout.on(&quot;data&quot;, (chunk) =&gt; {
+    buffer += chunk.toString(&quot;utf-8&quot;);
+    const lines = buffer.split(&quot;\n&quot;);
+    buffer = lines.pop() || &quot;&quot;;
 
-    function renderApiLogs() {
-      const container = document.getElementById("api-logs");
-      container.innerHTML = state.apiLogs.map(item => {
-        const statusColor = item.status < 300 ? "text-emerald-500" : "text-amber-500";
-        return `<div class="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)] flex flex-col gap-0.5">
-          <div class="flex items-center justify-between">
-            <span><strong class="text-[var(--primary)]">${item.method}</strong> ${item.path}</span>
-            <span class="${statusColor} font-bold">HTTP ${item.status} · ${item.time}</span>
-          </div>
-          <div class="text-[var(--muted-foreground)]">${item.summary}</div>
-        </div>`;
-      }).join("");
-    }
-
-    function getMateriaName(materiaId) {
-      const m = state.materias.find(x => x.id === materiaId);
-      return m ? m.nombre : "General";
-    }
-
-    function formatDateEs(iso) {
-      const d = new Date(iso);
-      return d.toLocaleDateString("es-CO", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
-    }
-
-    // ---------------- NAVEGACIÓN DEL TELÉFONO ANDROID ----------------
-    function navigatePhone(screen, tareaId = null) {
-      state.phoneScreen = screen;
-      if (tareaId) state.selectedTareaId = tareaId;
-
-      ["materias", "tareas", "crear-tarea"].forEach(key => {
-        const btn = document.getElementById("nav-btn-" + (key === "crear-tarea" ? "crear" : key));
-        if (btn) {
-          btn.className = "flex flex-col items-center gap-0.5 text-xs " +
-            (state.phoneScreen === key ? "font-semibold text-[var(--primary)]" : "text-[var(--muted-foreground)]");
-        }
-      });
-
-      const vp = document.getElementById("phone-viewport");
-
-      if (screen === "login") {
-        vp.innerHTML = `
-          <div class="my-auto space-y-4">
-            <div class="text-center space-y-1">
-              <div class="w-12 h-12 rounded-2xl bg-[var(--primary)] text-[var(--primary-foreground)] mx-auto flex items-center justify-center text-xl font-bold">🎓</div>
-              <h3 class="text-base font-bold">Academic Mobile</h3>
-              <p class="text-xs text-[var(--muted-foreground)]">Inicia sesión con tu cuenta institucional</p>
-            </div>
-            <div class="space-y-2.5">
-              <div>
-                <label class="text-xs font-medium">Correo electrónico</label>
-                <input id="login-email" value="${state.user.email}" class="w-full mt-1 px-3 py-2 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]" />
-              </div>
-              <div>
-                <label class="text-xs font-medium">Contraseña</label>
-                <input type="password" value="ClaveSegura123" class="w-full mt-1 px-3 py-2 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]" />
-              </div>
-              <button onclick="doPhoneLogin()" class="w-full py-2.5 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
-                Iniciar Sesión (JWT)
-              </button>
-            </div>
-            <div class="p-2.5 rounded-xl bg-[var(--card)] border border-[var(--border)] text-xs text-[var(--muted-foreground)]">
-              🔒 Tokens guardados en <strong>EncryptedSharedPreferences</strong> con renovación automática vía <code>TokenAuthenticator</code>.
-            </div>
-          </div>
-        `;
-        return;
-      }
-
-      if (screen === "materias") {
-        logApi("GET", "/api/v1/materias?limite=50&desplazamiento=0", 200, `Retornadas ${state.materias.length} materias de ${state.user.nombre}`);
-        vp.innerHTML = `
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <div>
-                <div class="text-xs text-[var(--muted-foreground)]">Hola, ${state.user.nombre}</div>
-                <h3 class="text-sm font-bold">Mis Materias (${state.materias.length})</h3>
-              </div>
-              <button onclick="navigatePhone('nueva-materia')" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
-                + Materia
-              </button>
-            </div>
-            <div class="space-y-2.5 max-h-[410px] overflow-y-auto pr-1">
-              ${state.materias.map(m => {
-                const count = state.tareas.filter(t => t.materia_id === m.id).length;
-                return `
-                  <div onclick="filterTareasByMateria('${m.id}')" class="cursor-pointer p-3 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-[var(--primary)] transition space-y-1">
-                    <div class="flex items-center justify-between">
-                      <span class="text-xs font-bold">${m.nombre}</span>
-                      <span class="px-2 py-0.5 rounded-full text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] font-mono">${m.codigo}</span>
-                    </div>
-                    <p class="text-xs text-[var(--muted-foreground)]">${m.descripcion}</p>
-                    <div class="flex items-center justify-between pt-1 text-xs text-[var(--muted-foreground)]">
-                      <span>Semestre ${m.semestre}</span>
-                      <span class="font-semibold text-[var(--primary)]">${count} tarea(s) →</span>
-                    </div>
-                  </div>
-                `;
-              }).join("")}
-            </div>
-          </div>
-        `;
-        return;
-      }
-
-      if (screen === "nueva-materia") {
-        vp.innerHTML = `
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <h3 class="text-sm font-bold">Nueva Materia</h3>
-              <button onclick="navigatePhone('materias')" class="text-xs text-[var(--muted-foreground)]">Cancelar</button>
-            </div>
-            <div class="space-y-2.5">
-              <div>
-                <label class="text-xs font-medium">Nombre de la asignatura</label>
-                <input id="mat-nombre" placeholder="Ej: Bases de Datos II" value="Bases de Datos II" class="w-full mt-1 px-3 py-2 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]" />
-              </div>
-              <div class="grid grid-cols-2 gap-2">
-                <div>
-                  <label class="text-xs font-medium">Código</label>
-                  <input id="mat-codigo" value="IS-405" class="w-full mt-1 px-3 py-2 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]" />
-                </div>
-                <div>
-                  <label class="text-xs font-medium">Semestre</label>
-                  <input id="mat-semestre" value="2026-2" class="w-full mt-1 px-3 py-2 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]" />
-                </div>
-              </div>
-              <div>
-                <label class="text-xs font-medium">Descripción</label>
-                <textarea id="mat-desc" rows="2" class="w-full mt-1 px-3 py-2 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]"> Índices B-Tree, transacciones ACID y optimización SQL.</textarea>
-              </div>
-              <button onclick="saveNewMateria()" class="w-full py-2.5 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
-                Guardar en academic-api
-              </button>
-            </div>
-          </div>
-        `;
-        return;
-      }
-
-      if (screen === "tareas") {
-        const filtered = state.tareas.filter(t => {
-          const okMat = state.selectedMateriaFilter === "todas" || t.materia_id === state.selectedMateriaFilter;
-          const okEst = state.selectedEstadoFilter === "todas" || t.estado === state.selectedEstadoFilter;
-          return okMat && okEst;
-        });
-        logApi("GET", `/api/v1/tareas?limite=50${state.selectedEstadoFilter !== 'todas' ? '&estado=' + state.selectedEstadoFilter : ''}`, 200, `Listadas ${filtered.length} tareas`);
-
-        vp.innerHTML = `
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <h3 class="text-sm font-bold">Mis Tareas (${filtered.length})</h3>
-              ${state.selectedMateriaFilter !== "todas" ? `<button onclick="clearMateriaFilter()" class="text-xs text-[var(--primary)]">Ver todas</button>` : ""}
-            </div>
-
-            <!-- ChipGroup Material 3 para filtrar por estado -->
-            <div class="flex gap-1.5 overflow-x-auto pb-1">
-              ${["todas", "pendiente", "en_progreso", "completada"].map(est => `
-                <button onclick="setEstadoFilter('${est}')" class="px-2.5 py-1 rounded-full text-xs border border-[var(--border)] ${state.selectedEstadoFilter === est ? 'bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold' : 'bg-[var(--card)] text-[var(--muted-foreground)]'}">
-                  ${est === "todas" ? "Todas" : est.replace("_", " ")}
-                </button>
-              `).join("")}
-            </div>
-
-            <div class="space-y-2 max-h-[370px] overflow-y-auto pr-1">
-              ${filtered.map(t => {
-                const badge = t.estado === "completada"
-                  ? `<span class="px-2 py-0.5 rounded-full text-xs bg-emerald-500/15 text-emerald-500 font-medium">Completada</span>`
-                  : t.estado === "en_progreso"
-                  ? `<span class="px-2 py-0.5 rounded-full text-xs bg-amber-500/15 text-amber-500 font-medium">En progreso</span>`
-                  : `<span class="px-2 py-0.5 rounded-full text-xs bg-rose-500/15 text-rose-500 font-medium">Pendiente</span>`;
-                return `
-                  <div onclick="navigatePhone('detalle-tarea', '${t.id}')" class="cursor-pointer p-3 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-[var(--primary)] transition space-y-1">
-                    <div class="flex items-start justify-between gap-2">
-                      <span class="text-xs font-bold">${t.titulo}</span>
-                      ${badge}
-                    </div>
-                    <div class="text-xs text-[var(--muted-foreground)]">📚 ${getMateriaName(t.materia_id)}</div>
-                    <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)] pt-1">
-                      <span>⏰ ${formatDateEs(t.fecha_entrega)}</span>
-                      <span class="uppercase font-semibold">Prioridad ${t.prioridad}</span>
-                    </div>
-                  </div>
-                `;
-              }).join("")}
-            </div>
-          </div>
-        `;
-        return;
-      }
-
-      if (screen === "detalle-tarea") {
-        const t = state.tareas.find(x => x.id === state.selectedTareaId) || state.tareas[0];
-        if (!t) return navigatePhone("tareas");
-        vp.innerHTML = `
-          <div class="space-y-3">
-            <button onclick="navigatePhone('tareas')" class="text-xs text-[var(--primary)] font-semibold">← Volver a tareas</button>
-            <div class="p-3.5 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-2">
-              <div class="text-xs text-[var(--muted-foreground)]">${getMateriaName(t.materia_id)}</div>
-              <h3 class="text-sm font-bold">${t.titulo}</h3>
-              <p class="text-xs text-[var(--muted-foreground)]">${t.descripcion || "Sin descripción"}</p>
-              <div class="pt-2 border-t border-[var(--border)] text-xs space-y-1">
-                <div><strong>Estado actual:</strong> ${t.estado.replace("_", " ")}</div>
-                <div><strong>Prioridad:</strong> ${t.prioridad}</div>
-                <div><strong>Entrega:</strong> ${formatDateEs(t.fecha_entrega)}</div>
-              </div>
-            </div>
-            <div class="space-y-2">
-              <div class="text-xs font-semibold">Cambiar estado (PUT /api/v1/tareas/${t.id}):</div>
-              <div class="grid grid-cols-2 gap-2">
-                <button onclick="updateTareaStatus('${t.id}', 'en_progreso')" class="py-2 rounded-xl text-xs font-semibold bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
-                  🟡 En Progreso
-                </button>
-                <button onclick="updateTareaStatus('${t.id}', 'completada')" class="py-2 rounded-xl text-xs font-semibold bg-emerald-600 text-white">
-                  🟢 Completada
-                </button>
-              </div>
-              <button onclick="deleteTarea('${t.id}')" class="w-full py-2 rounded-xl text-xs font-semibold bg-rose-500/15 text-rose-500 border border-rose-500/30">
-                🗑 Eliminar Tarea
-              </button>
-            </div>
-          </div>
-        `;
-        return;
-      }
-
-      if (screen === "crear-tarea") {
-        vp.innerHTML = `
-          <div class="space-y-3">
-            <h3 class="text-sm font-bold">Crear Nueva Tarea</h3>
-            <div class="space-y-2">
-              <div>
-                <label class="text-xs font-medium">Título de la entrega</label>
-                <input id="tar-titulo" value="Preparar sustentación final Academic" class="w-full mt-1 px-3 py-1.5 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]" />
-              </div>
-              <div>
-                <label class="text-xs font-medium">Materia</label>
-                <select id="tar-materia" class="w-full mt-1 px-3 py-1.5 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]">
-                  ${state.materias.map(m => `<option value="${m.id}">${m.nombre} (${m.codigo})</option>`).join("")}
-                </select>
-              </div>
-              <div class="grid grid-cols-2 gap-2">
-                <div>
-                  <label class="text-xs font-medium">Prioridad</label>
-                  <select id="tar-prio" class="w-full mt-1 px-3 py-1.5 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]">
-                    <option value="alta">Alta</option>
-                    <option value="media">Media</option>
-                    <option value="baja">Baja</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="text-xs font-medium">Entrega (días)</label>
-                  <input id="tar-dias" type="number" value="3" min="1" max="30" class="w-full mt-1 px-3 py-1.5 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]" />
-                </div>
-              </div>
-              <div>
-                <label class="text-xs font-medium">Descripción</label>
-                <textarea id="tar-desc" rows="2" class="w-full mt-1 px-3 py-1.5 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]">Demostrar API, Bot, App Android, RAG y Docker funcionando juntos.</textarea>
-              </div>
-              <button onclick="saveNewTarea()" class="w-full py-2.5 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
-                Publicar Tarea (POST /api/v1/tareas)
-              </button>
-            </div>
-          </div>
-        `;
-      }
-    }
-
-    function doPhoneLogin() {
-      const email = document.getElementById("login-email").value;
-      state.user.email = email;
-      logApi("POST", "/api/v1/auth/login", 200, `Tokens emitidos para ${email}`);
-      navigatePhone("materias");
-    }
-
-    function saveNewMateria() {
-      const nombre = document.getElementById("mat-nombre").value.trim() || "Nueva Materia";
-      const codigo = document.getElementById("mat-codigo").value.trim() || "IS-999";
-      const semestre = document.getElementById("mat-semestre").value.trim() || "2026-2";
-      const descripcion = document.getElementById("mat-desc").value.trim();
-      const id = "mat-" + (state.materias.length + 1);
-      state.materias.unshift({ id, nombre, codigo, semestre, descripcion, profesor: "Docente Asignado" });
-      logApi("POST", "/api/v1/materias", 201, `Materia creada: ${nombre} (${codigo}) — ya disponible en Telegram con /materias`);
-      navigatePhone("materias");
-    }
-
-    function saveNewTarea() {
-      const titulo = document.getElementById("tar-titulo").value.trim() || "Nueva Tarea";
-      const materia_id = document.getElementById("tar-materia").value;
-      const prioridad = document.getElementById("tar-prio").value;
-      const dias = parseInt(document.getElementById("tar-dias").value || "2", 10);
-      const descripcion = document.getElementById("tar-desc").value.trim();
-      const fecha = new Date(Date.now() + dias * 86400000).toISOString();
-      const id = "tar-" + (state.tareas.length + 1);
-      state.tareas.unshift({ id, titulo, descripcion, fecha_entrega: fecha, prioridad, estado: "pendiente", materia_id });
-      logApi("POST", "/api/v1/tareas", 201, `Tarea creada: "${titulo}" — prueba /tareas o /pendientes en el Bot`);
-      navigatePhone("tareas");
-    }
-
-    function updateTareaStatus(id, nuevoEstado) {
-      const t = state.tareas.find(x => x.id === id);
-      if (t) {
-        t.estado = nuevoEstado;
-        logApi("PUT", `/api/v1/tareas/${id}`, 200, `Estado actualizado a '${nuevoEstado}'`);
-        navigatePhone("detalle-tarea", id);
-      }
-    }
-
-    function deleteTarea(id) {
-      state.tareas = state.tareas.filter(x => x.id !== id);
-      logApi("DELETE", `/api/v1/tareas/${id}`, 204, "Tarea eliminada correctamente");
-      navigatePhone("tareas");
-    }
-
-    function filterTareasByMateria(materiaId) {
-      state.selectedMateriaFilter = materiaId;
-      navigatePhone("tareas");
-    }
-
-    function clearMateriaFilter() {
-      state.selectedMateriaFilter = "todas";
-      navigatePhone("tareas");
-    }
-
-    function setEstadoFilter(est) {
-      state.selectedEstadoFilter = est;
-      navigatePhone("tareas");
-    }
-
-    // ---------------- SIMULADOR OMNICANAL WHATSAPP QR + TELEGRAM (academic-bot) ----------------
-    state.botChannel = "whatsapp";
-
-    function setBotChannel(chan) {
-      state.botChannel = chan;
-      const avatar = document.getElementById("bot-avatar");
-      const title = document.getElementById("bot-title");
-      const subtitle = document.getElementById("bot-subtitle");
-      const btnWsp = document.getElementById("btn-chan-whatsapp");
-      const btnTg = document.getElementById("btn-chan-telegram");
-
-      if (chan === "whatsapp") {
-        avatar.textContent = "📱";
-        avatar.className = "w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm";
-        title.textContent = "WhatsApp QR Bridge (+57 300 123 4567)";
-        subtitle.textContent = "Vinculado vía Baileys (:3005) · Filtro inteligente de chats personales activo";
-        btnWsp.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white";
-        btnTg.className = "px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]";
-      } else {
-        avatar.textContent = "🤖";
-        avatar.className = "w-9 h-9 rounded-full bg-[var(--primary)] text-[var(--primary-foreground)] flex items-center justify-center font-bold text-sm";
-        title.textContent = "Telegram Bot (@AcademicUcpBot)";
-        subtitle.textContent = "En línea vía Long Polling · Conectado a academic-api (:8000) y academic-rag (:8001)";
-        btnTg.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]";
-        btnWsp.className = "px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]";
-      }
-    }
-
-    function toggleQrModal() {
-      const el = document.getElementById("wsp-qr-drawer");
-      if (el) el.classList.toggle("hidden");
-    }
-
-    function appendBotMessage(sender, htmlContent) {
-      state.botMessages.push({ sender, htmlContent });
-      const box = document.getElementById("bot-messages");
-      box.innerHTML = state.botMessages.map(m => {
-        if (m.sender === "user") {
-          return `<div class="flex justify-end">
-            <div class="px-3 py-2 rounded-2xl rounded-tr-none bg-[var(--primary)] text-[var(--primary-foreground)] text-xs max-w-[80%]">${m.htmlContent}</div>
-          </div>`;
-        }
-        return `<div class="flex justify-start">
-          <div class="p-3 rounded-2xl rounded-tl-none bg-[var(--card)] border border-[var(--border)] text-xs max-w-[88%] space-y-1">${m.htmlContent}</div>
-        </div>`;
-      }).join("");
-      box.scrollTop = box.scrollHeight;
-    }
-
-    function clearBotChat() {
-      state.botMessages = [];
-      runBotCommand("/start");
-    }
-
-    function handleBotSubmit(e) {
-      e.preventDefault();
-      const input = document.getElementById("bot-input");
-      const val = input.value.trim();
-      if (!val) return;
-      input.value = "";
-      runBotCommand(val);
-    }
-
-    function queryLocalRag(question) {
-      const q = question.toLowerCase();
-      const matches = [];
-      state.ragDocs.forEach(doc => {
-        doc.chunks.forEach(ch => {
-          let score = 0.62;
-          if ((q.includes("poo") || q.includes("pilar") || q.includes("objeto")) && ch.texto.toLowerCase().includes("encapsulamiento")) score = 0.94;
-          if ((q.includes("binaria") || q.includes("complejidad") || q.includes("big o")) && ch.texto.toLowerCase().includes("log n")) score = 0.96;
-          if ((q.includes("foránea") || q.includes("foranea") || q.includes("acid") || q.includes("clave")) && ch.texto.toLowerCase().includes("acid")) score = 0.95;
-          matches.push({
-            documento: doc.nombre_archivo,
-            pagina: ch.pagina,
-            texto: ch.texto,
-            relevancia: score
-          });
-        });
-      });
-      matches.sort((a, b) => b.relevancia - a.relevancia);
-      return matches.slice(0, 2);
-    }
-
-    function runBotCommand(cmd) {
-      appendBotMessage("user", cmd);
-
-      // En WhatsApp QR, cualquier mensaje personal que no empiece con "/" es ignorado silenciosamente
-      if (state.botChannel === "whatsapp" && !cmd.startsWith("/")) {
-        appendBotMessage("bot", `
-          <div class="font-bold text-emerald-500">🔕 [Filtro de Privacidad WhatsApp QR]</div>
-          <div class="text-[var(--muted-foreground)]">
-            <code>processor.py</code> detectó un mensaje personal sin prefijo <code>/</code> y devolvió <code>{"reply": null}</code>. Tu WhatsApp no envía ninguna respuesta automática a tus amigos o familiares.
-          </div>
-        `);
-        return;
-      }
-
-      if (cmd.startsWith("/start") || cmd.startsWith("/help")) {
-        appendBotMessage("bot", `
-          <div class="font-bold">🎓 ¡Bienvenido a Academic Bot, ${state.user.nombre}!</div>
-          <div>Tu sesión JWT está vinculada con <code>${state.user.email}</code>.</div>
-          <div class="pt-1 text-[var(--muted-foreground)]">
-            Comandos activos: <code>/materias</code>, <code>/tareas</code>, <code>/pendientes</code>, <code>/recordar</code>, <code>/preguntar</code>.
-          </div>
-        `);
-        return;
-      }
-
-      if (cmd.startsWith("/materias")) {
-        logApi("GET", "/api/v1/materias?limite=50&desplazamiento=0", 200, "AcademicBot consultó el listado de materias");
-        const listHtml = state.materias.map((m, idx) =>
-          `<div><strong>${idx + 1}. ${m.nombre}</strong> (<code>${m.codigo}</code>)<br/><span class="text-[var(--muted-foreground)]">   📌 Semestre: ${m.semestre} · ${m.descripcion}</span></div>`
-        ).join("");
-        appendBotMessage("bot", `
-          <div class="font-bold">📚 Tus Materias Matriculadas (${state.materias.length}):</div>
-          <div class="space-y-1.5 pt-1">${listHtml}</div>
-        `);
-        return;
-      }
-
-      if (cmd.startsWith("/tareas") || cmd.startsWith("/pendientes")) {
-        const soloPend = cmd.startsWith("/pendientes");
-        const lista = soloPend ? state.tareas.filter(t => t.estado !== "completada") : state.tareas;
-        logApi("GET", "/api/v1/tareas?limite=50&desplazamiento=0", 200, `AcademicBot consultó ${lista.length} tarea(s)`);
-        const itemsHtml = lista.map((t, idx) => {
-          const icon = t.estado === "completada" ? "🟢 Entregada" : t.estado === "en_progreso" ? "🟡 En progreso" : "🔴 Pendiente";
-          return `<div>
-            <strong>${idx + 1}. ${t.titulo}</strong><br/>
-            <span class="text-[var(--muted-foreground)]">📚 ${getMateriaName(t.materia_id)} · ${icon} · ⏰ ${formatDateEs(t.fecha_entrega)}</span>
-          </div>`;
-        }).join("");
-        appendBotMessage("bot", `
-          <div class="font-bold">${soloPend ? "⏳ Entregas Pendientes (Próximos 7 días):" : "📋 Todas tus Tareas:"}</div>
-          <div class="space-y-1.5 pt-1">${itemsHtml || "🎉 ¡No tienes tareas pendientes!"}</div>
-        `);
-        return;
-      }
-
-      if (cmd.startsWith("/recordar")) {
-        const resto = cmd.replace("/recordar", "").trim() || "30m Repasar apuntes";
-        appendBotMessage("bot", `
-          <div class="font-bold">⏰ Recordatorio Programado (APScheduler)</div>
-          <div>Se enviará una alerta a este chat en: <code>${resto}</code></div>
-        `);
-        return;
-      }
-
-      const query = cmd.replace("/preguntar", "").trim() || cmd;
-      logApi("POST", "/api/v1/preguntar", 200, `AcademicBot consultó a academic-rag: "${query}"`);
-      const citas = queryLocalRag(query);
-      const citasHtml = citas.map((c, i) => `
-        <div class="p-2 rounded-lg bg-[var(--background)] border border-[var(--border)]">
-          <div class="font-semibold">📄 [${i + 1}] ${c.documento} (Pág. ${c.pagina}) — Confianza: ${(c.relevancia * 100).toFixed(0)}%</div>
-          <div class="italic text-[var(--muted-foreground)]">"${c.texto}"</div>
-        </div>
-      `).join("");
-      appendBotMessage("bot", `
-        <div class="font-bold">🤖 Asistente Académico (RAG)</div>
-        <div><strong>Pregunta:</strong> <em>${query}</em></div>
-        <div class="pt-1">📚 <strong>Fuentes y Citas Consultadas:</strong></div>
-        <div class="space-y-1.5 pt-1">${citasHtml}</div>
-      `);
-    }
-
-    // ---------------- LABORATORIO RAG ----------------
-    function renderRagDocs() {
-      const box = document.getElementById("rag-docs-list");
-      box.innerHTML = state.ragDocs.map(d => `
-        <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] flex items-center justify-between">
-          <div>
-            <div class="text-xs font-bold">📄 ${d.nombre_archivo}</div>
-            <div class="text-xs text-[var(--muted-foreground)]">${d.total_paginas} página(s) · ${d.chunks.length} fragmentos vectorizados</div>
-          </div>
-          <span class="px-2 py-0.5 rounded text-xs bg-emerald-500/15 text-emerald-500 font-mono">Indexado</span>
-        </div>
-      `).join("");
-    }
-
-    function uploadSimulatedPdf() {
-      const name = document.getElementById("new-pdf-name").value.trim() || "apuntes_nuevo.pdf";
-      const text = document.getElementById("new-pdf-text").value.trim();
-      if (!text) return;
-      state.ragDocs.push({
-        id: "doc-" + (state.ragDocs.length + 1),
-        nombre_archivo: name,
-        total_paginas: 1,
-        total_fragmentos: 1,
-        chunks: [{ pagina: 1, texto: text }]
-      });
-      logApi("POST", "/api/v1/documentos", 201, `PDF '${name}' indexado en ChromaDB`);
-      renderRagDocs();
-      askRagStudio("¿Qué garantiza una clave foránea y qué significa ACID?");
-    }
-
-    function handleRagStudioSubmit(e) {
-      e.preventDefault();
-      const input = document.getElementById("rag-studio-input");
-      if (!input.value.trim()) return;
-      askRagStudio(input.value.trim());
-    }
-
-    function askRagStudio(question) {
-      document.getElementById("rag-studio-input").value = question;
-      logApi("POST", "/api/v1/preguntar", 200, `Búsqueda vectorial top_k=2 para "${question}"`);
-      const citas = queryLocalRag(question);
-      const out = document.getElementById("rag-studio-output");
-      out.innerHTML = `
-        <div class="text-xs font-semibold text-[var(--primary)]">Respuesta generada con citas verificables:</div>
-        <div class="text-xs">Basado en tus apuntes académicos indexados para <strong>"${question}"</strong>:</div>
-        <div class="space-y-2">
-          ${citas.map((c, idx) => `
-            <div class="p-3 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-1">
-              <div class="flex items-center justify-between text-xs">
-                <span class="font-bold">Cita #${idx + 1} · ${c.documento} (Página ${c.pagina})</span>
-                <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-semibold">Similitud ${(c.relevancia * 100).toFixed(1)}%</span>
-              </div>
-              <p class="text-xs text-[var(--muted-foreground)]">"${c.texto}"</p>
-            </div>
-          `).join("")}
-        </div>
-      `;
-    }
-
-    function setMainMode(mode) {
-      ["split", "rag", "platform"].forEach(m => {
-        document.getElementById("section-" + m).classList.toggle("hidden", m !== mode);
-        const btn = document.getElementById("mode-" + m);
-        btn.className = m === mode
-          ? "px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] transition"
-          : "px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] transition";
-      });
-    }
-
-    function toggleTheme() {
-      document.body.classList.toggle("light-mode");
-      const btn = document.getElementById("theme-btn");
-      btn.textContent = document.body.classList.contains("light-mode") ? "🌙 Modo Oscuro" : "☀️ Modo Claro";
-    }
-
-    async function checkLocalBackend() {
-      const badge = document.getElementById("backend-conn-badge");
+    for (const line of lines) {
+      if (!line.trim()) continue;
       try {
-        const res = await fetch("http://localhost:8000/health", { mode: "cors" });
-        if (res.ok) {
-          badge.textContent = "🟢 Conectado en Vivo a localhost:8000 & :8001";
-          badge.className = "px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-semibold";
+        const data = JSON.parse(line);
+        const resolver = pendingRequests.get(data.id);
+        if (resolver) {
+          pendingRequests.delete(data.id);
+          resolver(data);
         }
-      } catch (_) {
-        // Permanece en Simulador Cloud Autónomo cuando se abre desde GitHub Pages
+      } catch (err) {
+        console.error(&quot;[Puente Python] Error parseando JSON:&quot;, err.message);
       }
     }
+  });
 
-    function runInteractiveE2ESuite() {
-      const out = document.getElementById("e2e-console-output");
-      out.innerHTML = "";
-      const steps = [
-        "=== 1. Salud de los servicios ===",
-        "  [OK  ] academic-api responde /health (200 OK)",
-        "  [OK  ] academic-rag responde /api/v1/health (200 OK)",
-        "=== 2. Autenticación JWT y Seguridad RBAC ===",
-        "  [OK  ] POST /api/v1/auth/registro devuelve 201",
-        "  [OK  ] Registro ignora 'rol: admin' (queda estudiante por seguridad RBAC)",
-        "  [OK  ] Registro duplicado devuelve 409 CONFLICT",
-        "  [OK  ] Login con clave incorrecta devuelve 401 UNAUTHORIZED",
-        "  [OK  ] Errores usan formato estándar {error:{codigo,mensaje}}",
-        "  [OK  ] Login correcto entrega access_token y refresh_token",
-        "  [OK  ] POST /api/v1/auth/refresh genera nuevo access_token",
-        "  [OK  ] Petición sin Bearer token a /materias devuelve 401",
-        "=== 3 & 4. CRUD Materias, Tareas y Aislamiento Multi-Tenancy ===",
-        "  [OK  ] Crear, listar y actualizar materia (PUT) -> 200 OK",
-        "  [OK  ] Crear, filtrar y completar tarea -> 200 OK",
-        "  [OK  ] Otro usuario NO puede ver ni borrar recursos ajenos (403/404)",
-        "=== 6. Microservicio RAG (PDF + Chunking + Citas) ===",
-        "  [OK  ] POST /api/v1/documentos indexa PDF de 2 páginas -> 201 CREATED",
-        "  [OK  ] POST /api/v1/preguntar retorna cita verificable en Página 2 (O(log n))",
-        "=== 7. Integración Omnicanal (WhatsApp QR + Telegram + Android Retrofit) ===",
-        "  [OK  ] WhatsApp QR ignora mensajes personales sin comando ('/...')",
-        "  [OK  ] WhatsApp QR completa login conversacional contra academic-api",
-        "  [OK  ] WhatsApp QR responde /materias y /preguntar con citas de página del PDF",
-        "  [OK  ] WhatsApp QR agenda recordatorios (/recordar 15m) con delay_seconds=900",
-        "  [OK  ] academic-mobile (Retrofit) coincide con todos los endpoints REST",
-        "============================================================",
-        "RESULTADO FINAL: 41 / 41 verificaciones correctas (100% PASS)",
-        "============================================================"
-      ];
-      steps.forEach((line, idx) => {
-        setTimeout(() => {
-          const div = document.createElement("div");
-          div.className = line.includes("[OK") ? "text-emerald-400" : line.includes("RESULTADO") ? "font-bold text-emerald-300" : "text-[var(--foreground)] font-semibold";
-          div.textContent = line;
-          out.appendChild(div);
-          out.scrollTop = out.scrollHeight;
-        }, idx * 90);
-      });
+  pyProc.on(&quot;exit&quot;, (code) =&gt; {
+    console.warn(`[Puente Python] Proceso finalizado (${code}). Reiniciando en 2s...`);
+    setTimeout(startPythonBridge, 2000);
+  });
+}
+
+function askPythonProcessor(sender, text) {
+  return new Promise((resolve) =&gt; {
+    const id = String(++reqCounter);
+    pendingRequests.set(id, resolve);
+    const payload = JSON.stringify({ id, sender, text }) + &quot;\n&quot;;
+    pyProc.stdin.write(payload, &quot;utf-8&quot;);
+  });
+}</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>3. El otro lado del puente (Python)</h4>
+          <code class="path">academic-bot/bot/whatsapp/bridge_cli.py · líneas 21–60</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-bot/blob/main/bot/whatsapp/bridge_cli.py#L21-L60" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>Bucle asíncrono que lee una línea de <code>stdin</code>, la procesa con <code>WhatsAppCommandProcessor</code> y
+      escribe la respuesta como JSON en <code>stdout</code>. Se fuerza UTF-8 para que tildes y emojis lleguen bien en
+      Windows.</p></div>
+      <pre class="line-numbers" data-start="21"><code class="language-python">async def _process_line(line: str) -&gt; Dict[str, Any]:
+    try:
+        payload = json.loads(line)
+    except json.JSONDecodeError:
+        return {&quot;id&quot;: None, &quot;reply&quot;: &quot;Error de formato JSON en el puente WhatsApp.&quot;, &quot;reminder&quot;: None}
+
+    req_id = payload.get(&quot;id&quot;)
+    sender = str(payload.get(&quot;sender&quot;) or &quot;whatsapp_user&quot;)
+    text = str(payload.get(&quot;text&quot;) or &quot;&quot;)
+
+    result = await whatsapp_processor.handle_message(sender_id=sender, raw_text=text)
+    return {
+        &quot;id&quot;: req_id,
+        &quot;reply&quot;: result.get(&quot;reply&quot;, &quot;&quot;),
+        &quot;reminder&quot;: result.get(&quot;reminder&quot;),
     }
 
-    // Inicializar vista
-    checkLocalBackend();
-    logApi("POST", "/api/v1/auth/login", 200, "Sesión iniciada para jean.mena@ucp.edu.co (access_token + refresh_token)");
-    navigatePhone("materias");
-    runBotCommand("/start");
-    renderRagDocs();
-    askRagStudio("¿Cuáles son los 4 pilares de la Programación Orientada a Objetos?");
-  </script>
+
+async def main_loop() -&gt; None:
+    &quot;&quot;&quot;Bucle principal de lectura por stdin y escritura por stdout en UTF-8.&quot;&quot;&quot;
+    if hasattr(sys.stdin, &quot;reconfigure&quot;):
+        sys.stdin.reconfigure(encoding=&quot;utf-8&quot;)
+    if hasattr(sys.stdout, &quot;reconfigure&quot;):
+        sys.stdout.reconfigure(encoding=&quot;utf-8&quot;)
+
+    loop = asyncio.get_running_loop()
+    while True:
+        line = await loop.run_in_executor(None, sys.stdin.readline)
+        if not line:
+            break
+        line = line.strip()
+        if not line:
+            continue
+        response = await _process_line(line)
+        sys.stdout.write(json.dumps(response, ensure_ascii=False) + &quot;\n&quot;)
+        sys.stdout.flush()
+
+
+if __name__ == &quot;__main__&quot;:
+    asyncio.run(main_loop())</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>4. Despachador de comandos y filtro de privacidad</h4>
+          <code class="path">academic-bot/bot/whatsapp/processor.py · líneas 87–159</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-bot/blob/main/bot/whatsapp/processor.py#L87-L159" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>El corazón del bot de WhatsApp. Funciona como una pequeña <strong>máquina de estados</strong> por usuario:</p>
+      <ul>
+        <li>Si el usuario está a mitad de un flujo (por ejemplo, el login le pidió la contraseña), el mensaje continúa ese flujo.</li>
+        <li>Si no, se identifica el comando (<code>/login</code>, <code>/materias</code>, <code>/preguntar</code>…).</li>
+        <li><strong>Filtro de privacidad</strong> (al final): si el texto no empieza por <code>/</code> devuelve una respuesta vacía.
+        Así se puede usar el número personal sin que el bot conteste a familiares o amigos.</li>
+      </ul></div>
+      <pre class="line-numbers" data-start="87"><code class="language-python">    async def handle_message(self, sender_id: str, raw_text: str) -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;Procesa un mensaje entrante de WhatsApp y retorna la respuesta y acciones opcionales.
+
+        Args:
+            sender_id: Identificador JID o número de WhatsApp (ej. &#x27;573001234567@s.whatsapp.net&#x27;).
+            raw_text: Texto enviado por el usuario.
+
+        Returns:
+            Diccionario con:
+                - &#x27;reply&#x27;: Texto formateado para WhatsApp.
+                - &#x27;reminder&#x27;: Diccionario opcional {&#x27;delay_seconds&#x27;: int, &#x27;text&#x27;: str} si agendó recordatorio.
+        &quot;&quot;&quot;
+        text = (raw_text or &quot;&quot;).strip()
+        if not text:
+            return {&quot;reply&quot;: self.get_welcome_menu(sender_id), &quot;reminder&quot;: None}
+
+        lower = text.lower()
+
+        # Cancelación global de flujo guiado
+        if lower in (&quot;/cancelar&quot;, &quot;/cancel&quot;, &quot;cancelar&quot;):
+            if sender_id in self._states:
+                self._states.pop(sender_id, None)
+                return {&quot;reply&quot;: &quot;🚫 Operación cancelada. Escribe `/help` para ver los comandos.&quot;, &quot;reminder&quot;: None}
+            return {&quot;reply&quot;: &quot;ℹ️ No hay ninguna operación en curso.&quot;, &quot;reminder&quot;: None}
+
+        # Si el usuario está en medio de un flujo conversacional (login, registro, preguntar, recordar)
+        if sender_id in self._states and not text.startswith(&quot;/&quot;):
+            return await self._continue_flow(sender_id, text)
+
+        # Limpiar cualquier estado anterior si envía un nuevo comando explícito
+        self._states.pop(sender_id, None)
+
+        if lower in (&quot;/start&quot;, &quot;/help&quot;, &quot;hola&quot;, &quot;menu&quot;, &quot;menú&quot;, &quot;ayuda&quot;, &quot;academic&quot;, &quot;/academic&quot;):
+            return {&quot;reply&quot;: self.get_welcome_menu(sender_id), &quot;reminder&quot;: None}
+
+        if lower.startswith(&quot;/logout&quot;) or lower == &quot;salir&quot;:
+            removed = self.storage.remove_token(sender_id)
+            if removed:
+                return {&quot;reply&quot;: &quot;👋 *Sesión cerrada correctamente.*\nUsa `/login` cuando desees volver a ingresar.&quot;, &quot;reminder&quot;: None}
+            return {&quot;reply&quot;: &quot;ℹ️ No tenías una sesión activa.&quot;, &quot;reminder&quot;: None}
+
+        if lower.startswith(&quot;/login&quot;):
+            return await self._handle_login_command(sender_id, text)
+
+        if lower.startswith(&quot;/registro&quot;):
+            return await self._handle_register_command(sender_id, text)
+
+        if lower.startswith(&quot;/materias&quot;) or lower == &quot;materias&quot;:
+            return {&quot;reply&quot;: await self._handle_materias(sender_id), &quot;reminder&quot;: None}
+
+        if lower.startswith(&quot;/tareas&quot;) or lower == &quot;tareas&quot;:
+            return {&quot;reply&quot;: await self._handle_tareas(sender_id, solo_pendientes=False), &quot;reminder&quot;: None}
+
+        if lower.startswith(&quot;/pendientes&quot;) or lower == &quot;pendientes&quot;:
+            return {&quot;reply&quot;: await self._handle_tareas(sender_id, solo_pendientes=True), &quot;reminder&quot;: None}
+
+        if lower.startswith(&quot;/recordar&quot;):
+            return self._handle_recordar_command(sender_id, text)
+
+        if lower.startswith(&quot;/preguntar&quot;):
+            return await self._handle_preguntar_command(sender_id, text)
+
+        # Si el mensaje empieza con &quot;/&quot; pero el comando no existe, avisar al usuario.
+        # Si es una conversación personal normal (sin &quot;/&quot;), ignorar para no interferir con chats personales.
+        if text.startswith(&quot;/&quot;):
+            return {
+                &quot;reply&quot;: (
+                    &quot;🤔 No reconocí ese comando.\n&quot;
+                    &quot;Escribe `/help` para ver la lista de comandos o usa `/preguntar &lt;tu duda&gt;` para consultar tus apuntes.&quot;
+                ),
+                &quot;reminder&quot;: None,
+            }
+        return {&quot;reply&quot;: &quot;&quot;, &quot;reminder&quot;: None}</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>5. Recordatorios</h4>
+          <code class="path">academic-bot/bot/whatsapp/processor.py · líneas 320–349</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-bot/blob/main/bot/whatsapp/processor.py#L320-L349" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p><code>/recordar 30m Estudiar AVL</code> se convierte en segundos (<code>parse_time_offset_or_date</code>) y se devuelve
+      un objeto <code>reminder</code> con <code>delay_seconds</code> y el texto. Quien programa el envío es Node.js (fragmento 1).
+      En Telegram se hace lo mismo con el <code>job_queue</code> de <code>python-telegram-bot</code>.</p></div>
+      <pre class="line-numbers" data-start="320"><code class="language-python">    def _build_reminder_response(self, tiempo_str: str, mensaje_tarea: str) -&gt; Dict[str, Any]:
+        seconds = parse_time_offset_or_date(tiempo_str)
+        if not seconds:
+            return {
+                &quot;reply&quot;: (
+                    &quot;⚠️ Formato de tiempo no válido. Usa números seguidos de `s`, `m`, `h` o `d` &quot;
+                    &quot;(por ejemplo: `/recordar 20m Estudiar para el parcial`).&quot;
+                ),
+                &quot;reminder&quot;: None,
+            }
+
+        delay_seconds = max(1, int(seconds))
+        trigger_dt = datetime.now(timezone.utc) + timedelta(seconds=delay_seconds)
+        fecha_legible = format_datetime_friendly(trigger_dt)
+        notif_text = format_reminder_notification(
+            tarea_titulo=mensaje_tarea,
+            fecha_entrega=trigger_dt.isoformat(),
+        )
+        return {
+            &quot;reply&quot;: (
+                &quot;✅ *Recordatorio Programado en WhatsApp*\n\n&quot;
+                f&quot;📝 *Motivo:* {mensaje_tarea}\n&quot;
+                f&quot;⏳ *Tiempo:* `{tiempo_str}` ({fecha_legible})\n&quot;
+                &quot;Te enviaré un mensaje de alerta por WhatsApp cuando se cumpla el tiempo.&quot;
+            ),
+            &quot;reminder&quot;: {
+                &quot;delay_seconds&quot;: delay_seconds,
+                &quot;text&quot;: notif_text,
+            },
+        }</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>6. Cliente HTTP hacia la API</h4>
+          <code class="path">academic-bot/bot/services/api_client.py · líneas 110–155</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-bot/blob/main/bot/services/api_client.py#L110-L155" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>El bot <strong>no accede a la base de datos</strong>: consume la API igual que la app móvil. Este cliente asíncrono
+      (<code>httpx</code>) agrega el header <code>Bearer</code> y traduce los códigos HTTP a excepciones del dominio
+      (<code>401→ApiAuthError</code>, <code>409→ApiConflictError</code>, etc.), para que los mensajes al usuario sean claros.</p></div>
+      <pre class="line-numbers" data-start="110"><code class="language-python">    def _handle_response_errors(self, response: httpx.Response) -&gt; None:
+        &quot;&quot;&quot;Verifica el código HTTP y lanza las excepciones de negocio correspondientes.&quot;&quot;&quot;
+        if response.is_success:
+            return
+
+        detail = self._extract_error_detail(response)
+        code = response.status_code
+
+        if code in (401, 403):
+            raise ApiAuthError(detail)
+        if code == 404:
+            raise ApiNotFoundError(detail)
+        if code == 409:
+            raise ApiConflictError(detail)
+        if code == 422:
+            raise ApiValidationError(detail)
+        if code &gt;= 500:
+            raise ApiClientError(f&quot;Error interno del servidor académico: {detail}&quot;, code=&quot;ERROR_SERVIDOR&quot;, status_code=code)
+        
+        raise ApiClientError(detail, status_code=code)
+
+    async def login(self, email: str, password: str) -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;
+        Autentica un usuario contra academic-api y obtiene el token JWT.
+
+        Args:
+            email: Correo electrónico universitario.
+            password: Clave de acceso.
+
+        Returns:
+            Diccionario con access_token, token_type y datos del usuario.
+        &quot;&quot;&quot;
+        url = f&quot;{self.base_url}/auth/login&quot;
+        payload = {&quot;email&quot;: email, &quot;password&quot;: password}
+
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.post(url, json=payload, headers=self._get_headers())
+                self._handle_response_errors(response)
+                return response.json()
+        except httpx.ConnectError as exc:
+            logger.error(&quot;No se pudo conectar con la API en %s: %s&quot;, url, exc)
+            raise ApiConnectionError(&quot;No fue posible conectar con el servidor académico.&quot;) from exc
+        except httpx.TimeoutException as exc:
+            logger.error(&quot;Tiempo de espera agotado al conectar con %s: %s&quot;, url, exc)
+            raise ApiConnectionError(&quot;El servidor tardó demasiado en responder.&quot;) from exc</code></pre>
+    </article>
+  </section>
+  <section id="mobile">
+    <div class="sec-head">
+      <span class="num">4</span>
+      <div>
+        <h2>academic-mobile — App Android</h2>
+        <a class="gh" href="https://github.com/academi-dev/academic-mobile" target="_blank" rel="noopener">github.com/academi-dev/academic-mobile ↗</a>
+      </div>
+    </div>
+    <div class="intro">
+          <p><strong>Qué hace:</strong> app nativa para iniciar sesión, ver y crear materias y tareas, filtrarlas y cambiar su estado.</p>
+          <p><strong>Tecnologías:</strong> Kotlin, arquitectura MVVM, Material Design 3, corrutinas y StateFlow, Retrofit + OkHttp.</p>
+          <p><strong>Recorrido sugerido:</strong> almacenamiento seguro (1) → manejo automático del token (2–3) → patrón MVVM (4).</p></div>
+    <details class="tree"><summary>Estructura de carpetas</summary><pre>academic-mobile/app/src/main/java/com/academic/mobile/
+├── AcademicApp.kt         # Application: crea TokenManager y Retrofit
+├── data/
+│   ├── api/               # AcademicApiService (Retrofit) · AuthInterceptor · TokenAuthenticator · RetrofitClient
+│   ├── local/             # TokenManager (EncryptedSharedPreferences)
+│   ├── models/            # DTOs de auth, materias, tareas y errores
+│   └── repository/        # AuthRepository · MateriasRepository · TareasRepository · Result
+├── ui/
+│   ├── auth/              # LoginActivity · RegisterActivity · AuthViewModel
+│   ├── materias/          # MateriasFragment · Adapter · ViewModel
+│   ├── tareas/            # TareasFragment · Crear/Detalle · Adapter · ViewModel
+│   └── common/            # UiState · ViewModelFactory
+└── utils/                 # Validators · DateUtils  (+ 3 archivos de pruebas JUnit)</pre></details>
+    
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>1. Guardar los tokens cifrados</h4>
+          <code class="path">academic-mobile/app/src/main/java/com/academic/mobile/data/local/TokenManager.kt · líneas 18–43</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-mobile/blob/main/app/src/main/java/com/academic/mobile/data/local/TokenManager.kt#L18-L43" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>Los tokens se guardan con <code>EncryptedSharedPreferences</code>: claves cifradas con AES-256-SIV y valores con
+      AES-256-GCM, usando una llave maestra del <em>Android Keystore</em>. Si el dispositivo no soporta el proveedor
+      criptográfico, se usan preferencias normales (ver retroalimentación).</p></div>
+      <pre class="line-numbers" data-start="18"><code class="language-kotlin">    private fun crearPreferenciasSeguras(appContext: Context): SharedPreferences {
+        return try {
+            val masterKey = MasterKey.Builder(appContext)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            EncryptedSharedPreferences.create(
+                appContext,
+                PREFS_FILENAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (_: Exception) {
+            appContext.getSharedPreferences(PREFS_FILENAME, Context.MODE_PRIVATE)
+        }
+    }
+
+    /**
+     * Almacena el token de acceso y el token de refresco tras iniciar o renovar sesión.
+     */
+    fun saveTokens(accessToken: String, refreshToken: String) {
+        prefs.edit()
+            .putString(KEY_ACCESS_TOKEN, accessToken)
+            .putString(KEY_REFRESH_TOKEN, refreshToken)
+            .apply()
+    }</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>2. Adjuntar el token a cada petición</h4>
+          <code class="path">academic-mobile/app/src/main/java/com/academic/mobile/data/api/AuthInterceptor.kt · líneas 11–38</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-mobile/blob/main/app/src/main/java/com/academic/mobile/data/api/AuthInterceptor.kt#L11-L38" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>Un <strong>interceptor de OkHttp</strong> agrega <code>Authorization: Bearer &lt;token&gt;</code> a todas las peticiones,
+      excepto a login, registro y refresh. Así ninguna pantalla tiene que acordarse de enviar el token.</p></div>
+      <pre class="line-numbers" data-start="11"><code class="language-kotlin">class AuthInterceptor(
+    private val tokenManager: TokenManager
+) : Interceptor {
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val originalRequest = chain.request()
+        val path = originalRequest.url.encodedPath
+
+        // No adjuntar token en los endpoints públicos de autenticación
+        if (path.endsWith(&quot;/auth/login&quot;) ||
+            path.endsWith(&quot;/auth/registro&quot;) ||
+            path.endsWith(&quot;/auth/refresh&quot;)
+        ) {
+            return chain.proceed(originalRequest)
+        }
+
+        val accessToken = tokenManager.getAccessToken()
+        if (accessToken.isNullOrBlank()) {
+            return chain.proceed(originalRequest)
+        }
+
+        val authenticatedRequest = originalRequest.newBuilder()
+            .header(&quot;Authorization&quot;, &quot;Bearer $accessToken&quot;)
+            .build()
+
+        return chain.proceed(authenticatedRequest)
+    }
+}</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>3. Renovar la sesión sin que el usuario lo note</h4>
+          <code class="path">academic-mobile/app/src/main/java/com/academic/mobile/data/api/TokenAuthenticator.kt · líneas 19–70</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-mobile/blob/main/app/src/main/java/com/academic/mobile/data/api/TokenAuthenticator.kt#L19-L70" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>Cuando la API responde <code>401</code>, OkHttp llama a este <code>Authenticator</code>. Este pide un nuevo par de
+      tokens con el <em>refresh token</em>, los guarda y <strong>repite la petición original</strong>. Si falla dos veces o no hay
+      refresh token, cierra la sesión. <code>@Synchronized</code> evita que varias peticiones simultáneas intenten
+      renovar a la vez.</p></div>
+      <pre class="line-numbers" data-start="19"><code class="language-kotlin">    @Synchronized
+    override fun authenticate(route: Route?, response: Response): Request? {
+        val path = response.request.url.encodedPath
+        if (path.endsWith(&quot;/auth/login&quot;) ||
+            path.endsWith(&quot;/auth/registro&quot;) ||
+            path.endsWith(&quot;/auth/refresh&quot;)
+        ) {
+            return null
+        }
+
+        // Evitar bucles infinitos de reintento
+        if (contarReintentos(response) &gt;= 2) {
+            tokenManager.clearSession()
+            return null
+        }
+
+        val refreshToken = tokenManager.getRefreshToken()
+        if (refreshToken.isNullOrBlank()) {
+            tokenManager.clearSession()
+            return null
+        }
+
+        return try {
+            val refreshResponse = apiServiceProvider()
+                .refrescarTokenSync(RefreshTokenRequest(refreshToken))
+                .execute()
+
+            val body = refreshResponse.body()
+            if (refreshResponse.isSuccessful &amp;&amp; body != null) {
+                tokenManager.saveTokens(body.accessToken, body.refreshToken)
+                response.request.newBuilder()
+                    .header(&quot;Authorization&quot;, &quot;Bearer ${body.accessToken}&quot;)
+                    .build()
+            } else {
+                tokenManager.clearSession()
+                null
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun contarReintentos(response: Response): Int {
+        var count = 1
+        var prior = response.priorResponse
+        while (prior != null) {
+            count++
+            prior = prior.priorResponse
+        }
+        return count
+    }
+}</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>4. MVVM: el ViewModel y el estado de la pantalla</h4>
+          <code class="path">academic-mobile/app/src/main/java/com/academic/mobile/ui/tareas/TareasViewModel.kt · líneas 43–127</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-mobile/blob/main/app/src/main/java/com/academic/mobile/ui/tareas/TareasViewModel.kt#L43-L127" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>La pantalla (Fragment) no llama a la API directamente. El ViewModel expone un <code>StateFlow&lt;UiState&gt;</code>
+      (<code>Idle</code>, <code>Loading</code>, <code>Success</code>, <code>Error</code>) que la vista observa para mostrar el
+      cargando, la lista o el error. Las llamadas corren en <code>viewModelScope</code> (corrutinas), así que no bloquean la
+      interfaz y se cancelan solas si el usuario sale de la pantalla.</p></div>
+      <pre class="line-numbers" data-start="43"><code class="language-kotlin">    /**
+     * Carga la lista de tareas aplicando los filtros activos de materia y estado.
+     */
+    fun cargarTareas(
+        materiaId: String? = filtroMateriaIdActual,
+        estado: String? = filtroEstadoActual
+    ) {
+        filtroMateriaIdActual = materiaId
+        filtroEstadoActual = estado
+        _tareasState.value = UiState.Loading
+
+        viewModelScope.launch {
+            when (val result = tareasRepository.obtenerTareas(materiaId = materiaId, estado = estado)) {
+                is Result.Success -&gt; _tareasState.value = UiState.Success(result.data)
+                is Result.Error -&gt; _tareasState.value = UiState.Error(result.message)
+            }
+        }
+    }
+
+    /**
+     * Carga las materias disponibles para poblar el selector al crear una tarea o mostrar el detalle.
+     */
+    fun cargarMateriasDisponibles() {
+        viewModelScope.launch {
+            val res = materiasRepository.obtenerMaterias()
+            if (res is Result.Success) {
+                _materiasDisponibles.value = res.data
+            }
+        }
+    }
+
+    /**
+     * Obtiene el nombre legible de una materia a partir de su UUID si se encuentra en caché.
+     */
+    fun obtenerNombreMateria(materiaId: String): String? {
+        return materiasRepository.obtenerMateriaEnCache(materiaId)?.let {
+            &quot;${it.codigo} · ${it.nombre}&quot;
+        }
+    }
+
+    /**
+     * Carga el detalle de una tarea específica por su identificador UUID.
+     */
+    fun cargarDetalleTarea(tareaId: String) {
+        _detalleTareaState.value = UiState.Loading
+        viewModelScope.launch {
+            if (_materiasDisponibles.value.isEmpty()) {
+                val matResult = materiasRepository.obtenerMaterias()
+                if (matResult is Result.Success) {
+                    _materiasDisponibles.value = matResult.data
+                }
+            }
+            when (val result = tareasRepository.obtenerTareaPorId(tareaId)) {
+                is Result.Success -&gt; _detalleTareaState.value = UiState.Success(result.data)
+                is Result.Error -&gt; _detalleTareaState.value = UiState.Error(result.message)
+            }
+        }
+    }
+
+    /**
+     * Registra una nueva tarea en `academic-api`.
+     */
+    fun crearTarea(
+        titulo: String,
+        descripcion: String?,
+        fechaEntregaIso: String?,
+        prioridad: String,
+        materiaId: String
+    ) {
+        _operacionState.value = UiState.Loading
+        viewModelScope.launch {
+            when (
+                val result = tareasRepository.crearTarea(
+                    titulo = titulo,
+                    descripcion = descripcion,
+                    fechaEntregaIso = fechaEntregaIso,
+                    prioridad = prioridad,
+                    materiaId = materiaId
+                )
+            ) {
+                is Result.Success -&gt; _operacionState.value = UiState.Success(&quot;CREADA&quot;)
+                is Result.Error -&gt; _operacionState.value = UiState.Error(result.message)
+            }
+        }
+    }</code></pre>
+    </article>
+  </section>
+  <section id="platform">
+    <div class="sec-head">
+      <span class="num">5</span>
+      <div>
+        <h2>academic-platform — Orquestación y pruebas</h2>
+        <a class="gh" href="https://github.com/academi-dev/academic-platform" target="_blank" rel="noopener">github.com/academi-dev/academic-platform ↗</a>
+      </div>
+    </div>
+    <div class="intro">
+          <p><strong>Qué hace:</strong> une todos los servicios con Docker Compose y un gateway Nginx. Contiene la prueba
+          de integración que verifica el sistema completo, la documentación y la demo.</p>
+          <p><strong>Tecnologías:</strong> Docker Compose, Nginx, PowerShell, Python (httpx).</p></div>
+    <details class="tree"><summary>Estructura de carpetas</summary><pre>academic-platform/
+├── docker-compose.yml     # postgres, academic-api, academic-rag, academic-bot, academic-whatsapp, nginx
+├── nginx/nginx.conf       # Gateway / reverse proxy
+├── scripts/
+│   ├── prueba_integracion.py   # 41 verificaciones de punta a punta
+│   ├── healthcheck.ps1 · init-db.ps1
+├── iniciar_todo_local.ps1 # Lanzador local sin Docker
+├── docs/                  # Arquitectura y documento técnico
+└── demo/index.html        # Demo interactiva</pre></details>
+    
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>1. Orquestación: la API espera a que la base de datos esté lista</h4>
+          <code class="path">academic-platform/docker-compose.yml · líneas 48–75</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-platform/blob/main/docker-compose.yml#L48-L75" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>Cada servicio se construye desde su propio repositorio. <code>depends_on</code> con
+      <code>condition: service_healthy</code> hace que la API no arranque hasta que PostgreSQL responda a
+      <code>pg_isready</code>. La API también expone su propio <em>healthcheck</em> en <code>/health</code>.</p></div>
+      <pre class="line-numbers" data-start="48"><code class="language-yaml">  academic-api:
+    build:
+      context: ../../proyecto 1/academic-api
+      dockerfile: Dockerfile
+    image: academic-api:latest
+    container_name: academic-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # academic-api usa SQLAlchemy síncrono con psycopg2
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-academic_user}:${POSTGRES_PASSWORD:-change-me-in-production}@postgres:5432/${POSTGRES_DB:-academic_db}
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS:-7}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    ports:
+      - &quot;${API_PORT:-8000}:8000&quot;
+    networks:
+      - academic-net
+    healthcheck:
+      test: [&quot;CMD-SHELL&quot;, &quot;curl -f http://localhost:8000/health || exit 1&quot;]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>2. Conector de WhatsApp como servicio</h4>
+          <code class="path">academic-platform/docker-compose.yml · líneas 135–156</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-platform/blob/main/docker-compose.yml#L135-L156" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>El conector de WhatsApp corre en su propio contenedor (Node.js + Python). La sesión vinculada se guarda en un
+      <strong>volumen</strong> (<code>whatsapp-auth</code>) para no tener que escanear el QR cada vez que se reinicia.</p></div>
+      <pre class="line-numbers" data-start="135"><code class="language-yaml">  academic-whatsapp:
+    build:
+      context: ../../proyecto 2/academic-bot
+      dockerfile: Dockerfile.whatsapp
+    image: academic-whatsapp:latest
+    container_name: academic-whatsapp
+    restart: unless-stopped
+    depends_on:
+      academic-api:
+        condition: service_healthy
+      academic-rag:
+        condition: service_started
+    environment:
+      API_BASE_URL: http://academic-api:8000/api/v1
+      RAG_BASE_URL: http://academic-rag:8000/api/v1
+      WHATSAPP_WEB_PORT: 3005
+    volumes:
+      - whatsapp-auth:/app/whatsapp_qr/auth_info_baileys
+    ports:
+      - &quot;${WHATSAPP_PORT:-3005}:3005&quot;
+    networks:
+      - academic-net</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>3. Gateway Nginx: una sola puerta de entrada</h4>
+          <code class="path">academic-platform/nginx/nginx.conf · líneas 105–176</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-platform/blob/main/nginx/nginx.conf#L105-L176" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>Los clientes solo conocen el puerto 80. Nginx enruta <code>/api/*</code> hacia la API y <code>/rag/*</code> hacia el
+      servicio de IA (quitando el prefijo). El RAG tiene tiempos de espera más largos porque procesar PDFs o consultar un
+      modelo puede tardar más.</p></div>
+      <pre class="line-numbers" data-start="105"><code class="language-nginx">        # ----------------------------------------------------------------------
+        # Rutas de la API Principal (academic-api:8000)
+        # ----------------------------------------------------------------------
+        location /api/ {
+            proxy_pass http://academic_api_backend;
+            proxy_http_version 1.1;
+            proxy_set_header Connection &quot;&quot;;
+
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-Host $host;
+            proxy_set_header X-Forwarded-Port $server_port;
+
+            proxy_connect_timeout 10s;
+            proxy_send_timeout 60s;
+            proxy_read_timeout 60s;
+            proxy_buffering on;
+            proxy_buffers 8 16k;
+        }
+
+        # ----------------------------------------------------------------------
+        # Rutas de la Documentación Swagger / OpenAPI (academic-api)
+        # ----------------------------------------------------------------------
+        location /docs {
+            proxy_pass http://academic_api_backend/docs;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /redoc {
+            proxy_pass http://academic_api_backend/redoc;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /openapi.json {
+            proxy_pass http://academic_api_backend/openapi.json;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # ----------------------------------------------------------------------
+        # Rutas del Servicio RAG (academic-rag:8000 dentro de la red)
+        # Enruta /rag/* eliminando el prefijo para la API interna de RAG
+        # ----------------------------------------------------------------------
+        location /rag/ {
+            rewrite ^/rag/(.*)$ /$1 break;
+            proxy_pass http://academic_rag_backend;
+            proxy_http_version 1.1;
+            proxy_set_header Connection &quot;&quot;;
+
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-Host $host;
+            proxy_set_header X-Forwarded-Port $server_port;
+
+            # Los modelos LLM y embeddings pueden tardar más tiempo en responder
+            proxy_connect_timeout 15s;
+            proxy_send_timeout 120s;
+            proxy_read_timeout 120s;
+            proxy_buffering off;
+        }</code></pre>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h4>4. Prueba de punta a punta del bot de WhatsApp</h4>
+          <code class="path">academic-platform/scripts/prueba_integracion.py · líneas 273–286</code>
+        </div>
+        <a class="gh" href="https://github.com/academi-dev/academic-platform/blob/main/scripts/prueba_integracion.py#L273-L286" target="_blank" rel="noopener">Ver en GitHub ↗</a>
+      </div>
+      <div class="explain">
+      <p>Parte de la prueba de integración de 41 verificaciones. Con la API y el RAG encendidos, simula una conversación
+      real de WhatsApp: un mensaje personal (debe ignorarse), login paso a paso, <code>/materias</code>,
+      <code>/preguntar</code> con citas y <code>/recordar</code>.</p></div>
+      <pre class="line-numbers" data-start="273"><code class="language-python">                # Flujo completo de WhatsApp QR (conversación multi-paso + filtro personal)
+                jid = &quot;573001234567@s.whatsapp.net&quot;
+                wsp_personal = await wsp_proc.handle_message(jid, &quot;Hola bro, nos vemos en la U&quot;)
+                await wsp_proc.handle_message(jid, &quot;/login&quot;)
+                await wsp_proc.handle_message(jid, email)
+                wsp_login = await wsp_proc.handle_message(jid, password)
+                wsp_mats = await wsp_proc.handle_message(jid, &quot;/materias&quot;)
+                wsp_rag = await wsp_proc.handle_message(
+                    jid, &quot;/preguntar ¿Qué complejidad tiene la búsqueda binaria?&quot;
+                )
+                wsp_rem = await wsp_proc.handle_message(
+                    jid, &quot;/recordar 15m Sustentar proyecto Academic&quot;
+                )
+                return mats, tars, ans, wsp_personal, wsp_login, wsp_mats, wsp_rag, wsp_rem</code></pre>
+    </article>
+  </section>
+
+  <section id="flujos">
+    <h2 style="margin-bottom:14px">Flujos completos (cómo se conectan los proyectos)</h2>
+    <div class="flows">
+      <div>
+        <h3>📱 Un estudiante crea una tarea desde la app</h3>
+        <ol class="flow">
+          <li><code>LoginActivity</code> → <code>POST /api/v1/auth/login</code> → la API devuelve access + refresh token.</li>
+          <li><code>TokenManager</code> guarda ambos tokens cifrados.</li>
+          <li><code>TareasViewModel.crearTarea()</code> llama al repositorio en una corrutina.</li>
+          <li><code>AuthInterceptor</code> agrega <code>Authorization: Bearer …</code>.</li>
+          <li>Nginx enruta <code>/api/v1/tareas</code> hacia academic-api.</li>
+          <li><code>get_current_user</code> valida el token y carga el usuario.</li>
+          <li><code>create_tarea</code> verifica que la materia sea suya y guarda en PostgreSQL → <code>201</code>.</li>
+          <li>Si el token expiró, la API responde <code>401</code> y <code>TokenAuthenticator</code> lo renueva y repite la petición.</li>
+        </ol>
+      </div>
+      <div>
+        <h3>🟢 Un estudiante pregunta por WhatsApp</h3>
+        <ol class="flow">
+          <li>Escribe <code>/preguntar ¿Qué complejidad tiene la búsqueda binaria?</code></li>
+          <li><code>index.js</code> recibe el mensaje y lo envía como JSON al proceso Python.</li>
+          <li><code>bridge_cli.py</code> lo pasa a <code>WhatsAppCommandProcessor.handle_message</code>.</li>
+          <li>El procesador identifica <code>/preguntar</code> y llama a <code>rag_client.ask_question</code>.</li>
+          <li>academic-rag busca los fragmentos más parecidos (<code>retrieve_relevant_chunks</code>).</li>
+          <li>Arma la respuesta con documento y página (<code>responder</code>).</li>
+          <li>El bot la formatea (<code>format_rag_response</code>) y Node.js la envía al chat.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="pruebas">
+    <h2 style="margin-bottom:14px">Pruebas y cómo ejecutarlo</h2>
+    <div class="tablewrap">
+      <table>
+        <tr><th>Suite</th><th>Qué verifica</th><th>Resultado</th></tr>
+        <tr><td>academic-api · <code>tests/</code></td><td>Registro, login, refresh, rol forzado, CRUD de materias y tareas, aislamiento entre usuarios.</td><td>23/23 ✓</td></tr>
+        <tr><td>academic-bot · <code>tests/</code></td><td>Formateo de mensajes, filtro de 7 días, sesiones, procesador de WhatsApp y filtro de privacidad.</td><td>34/34 ✓</td></tr>
+        <tr><td>academic-rag · <code>tests/</code></td><td>Subida de PDF, rechazo de archivos inválidos, fragmentación, citas por página.</td><td>13/13 ✓</td></tr>
+        <tr><td>academic-platform · <code>scripts/prueba_integracion.py</code></td><td>Sistema completo con servicios reales: API + RAG + bot de WhatsApp/Telegram + rutas de la app.</td><td>41/41 ✓</td></tr>
+      </table>
+    </div>
+    <div class="note">Las pruebas se ejecutaron en Windows con Python 3.15, SQLite y el respaldo vectorial local. La app Android
+    y el despliegue con Docker Compose aún no se han ejecutado (ver la sección siguiente).</div>
+    <p><strong>Ejecutar las pruebas de un servicio</strong> (ejemplo con la API):</p>
+    <pre class="cmd">cd academic-api
+python -m venv .venv && .venv\Scripts\activate
+pip install -r requirements.txt
+pytest -v</pre>
+    <p><strong>Levantar todo en local y correr la prueba de integración</strong> (desde <code>academic-platform</code>):</p>
+    <pre class="cmd">powershell -ExecutionPolicy Bypass -File iniciar_todo_local.ps1 -EjecutarPrueba</pre>
+    <p><strong>Con Docker</strong>:</p>
+    <pre class="cmd">cd academic-platform
+docker compose up -d --build</pre>
+  </section>
+
+  <section id="feedback">
+    <h2 style="margin-bottom:6px">⭐ Dónde pedimos su retroalimentación</h2>
+    <p style="color:var(--muted);margin-top:0">Decisiones que tomamos conscientemente y en las que su criterio nos ayudaría a mejorar.</p>
+    <ol class="feedback"><li><h4>Sesiones del bot en memoria</h4><p>El bot guarda el token de cada chat en un diccionario en memoria (<code>bot/utils/auth_storage.py</code>). Si el proceso se reinicia, todos deben volver a iniciar sesión. ¿Recomienda persistirlo (Redis o base de datos) y cifrarlo?</p></li><li><h4>El servicio RAG no valida el JWT</h4><p>Hoy cualquier cliente que llegue a <code>academic-rag</code> puede subir documentos y preguntar, y los documentos son compartidos entre usuarios. ¿Conviene validar el mismo JWT de la API y separar los documentos por <code>usuario_id</code>?</p></li><li><h4>Respuesta del RAG: extractiva vs. generada</h4><p>Sin una API key de OpenAI, la respuesta muestra los fragmentos encontrados con sus citas, pero no redacta un resumen. ¿Sería válido integrar un modelo local (por ejemplo, con Ollama) para generar la respuesta sin costo?</p></li><li><h4>Búsqueda léxica en el entorno local</h4><p>En Python 3.15 se usa el respaldo <code>LocalPersistentCollection</code>, que busca por palabras y recalcula los vectores en cada consulta (O(n)). En Docker se usa ChromaDB con embeddings reales. ¿Es aceptable esta estrategia o deberíamos fijar Python 3.11 en todos los entornos?</p></li><li><h4>Refresh tokens sin revocación</h4><p>Al cerrar sesión, el refresh token sigue siendo válido hasta que expira (7 días). ¿Recomienda una lista de revocación o rotación con detección de reutilización?</p></li><li><h4>WhatsApp con librería no oficial</h4><p>Baileys funciona como WhatsApp Web, lo que es práctico para el proyecto, pero no es la API oficial. Para un despliegue real, ¿migramos a la WhatsApp Cloud API de Meta?</p></li><li><h4>Respaldo sin cifrado en Android</h4><p>Si el dispositivo no soporta <code>EncryptedSharedPreferences</code>, <code>TokenManager</code> usa preferencias normales sin cifrar. ¿Es preferible bloquear el login en ese caso?</p></li><li><h4>Pendientes de validación</h4><p>La app Android está escrita completa pero <strong>aún no la hemos compilado ni probado en un dispositivo</strong>. El <code>docker-compose.yml</code> tampoco se ha ejecutado completo, porque no tenemos Docker instalado. Las pruebas actuales corren en modo local con SQLite. ¿Qué evidencia de despliegue esperaría ver?</p></li></ol>
+  </section>
+
+  <footer>
+    Academic · Jean Mena (@hilton45) y Eyfer Mena (@eyfer3174-commits) ·
+    <a href="https://github.com/academi-dev" target="_blank">github.com/academi-dev</a>
+  </footer>
+</main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "dark" });
+</script>
 </body>
 </html>

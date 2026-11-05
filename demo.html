@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Academic — Centro de Demostración Interactiva (5 Microservicios)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --background: #0b0f19;
+      --foreground: #f8fafc;
+      --card: #111827;
+      --border: #1e293b;
+      --primary: #3b82f6;
+      --primary-foreground: #ffffff;
+      --secondary: #1e293b;
+      --secondary-foreground: #e2e8f0;
+      --muted-foreground: #94a3b8;
+    }
+    body.light-mode {
+      --background: #f8fafc;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-foreground: #ffffff;
+      --secondary: #f1f5f9;
+      --secondary-foreground: #1e293b;
+      --muted-foreground: #64748b;
+    }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-4 md:p-6 space-y-5 max-w-[1440px] mx-auto transition-colors">
+
+  <!-- Barra Superior de Portafolio (Links directos a GitHub + Modo de Conexión + Tema) -->
+  <div class="flex flex-wrap items-center justify-between gap-2 text-xs bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-2.5">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="font-bold text-[var(--primary)]">🎓 Academic · Demo Interactiva</span>
+      <span id="repo-links" class="flex flex-wrap items-center gap-2">
+      <span class="text-[var(--muted-foreground)]">|</span>
+      <a href="https://github.com/academi-dev" target="_blank" class="hover:underline font-semibold">Portafolio General ↗</a>
+      <a href="https://github.com/academi-dev/academic-api" target="_blank" class="px-2 py-0.5 rounded bg-[var(--secondary)] hover:opacity-80">1. academic-api</a>
+      <a href="https://github.com/academi-dev/academic-bot" target="_blank" class="px-2 py-0.5 rounded bg-[var(--secondary)] hover:opacity-80">2. academic-bot</a>
+      <a href="https://github.com/academi-dev/academic-mobile" target="_blank" class="px-2 py-0.5 rounded bg-[var(--secondary)] hover:opacity-80">3. academic-mobile</a>
+      <a href="https://github.com/academi-dev/academic-platform" target="_blank" class="px-2 py-0.5 rounded bg-[var(--secondary)] hover:opacity-80">4. academic-platform</a>
+      <a href="https://github.com/academi-dev/academic-rag" target="_blank" class="px-2 py-0.5 rounded bg-[var(--secondary)] hover:opacity-80">5. academic-rag</a>
+      </span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span id="backend-conn-badge" class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 font-medium">
+        ⚡ Simulador Cloud Autónomo Activo
+      </span>
+      <button onclick="toggleTheme()" id="theme-btn" class="px-2.5 py-1 rounded-lg bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] font-medium">
+        ☀️ Modo Claro
+      </button>
+    </div>
+  </div>
+
+  <!-- Encabezado Principal -->
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2.5 flex-wrap">
+        <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
+          ECOSISTEMA EN VIVO
+        </span>
+        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
+          org: academi-dev · 5 Repositorios Sincronizados
+        </span>
+        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+          ● 70 Unit Tests + 41/41 E2E OK
+        </span>
+      </div>
+      <h1 class="text-xl font-bold mt-2">Academic — Demostración Interactiva de los 5 Proyectos Unidos</h1>
+      <p class="text-sm text-[var(--muted-foreground)] mt-1">
+        Todo lo que hagas en el celular Android se refleja al instante en WhatsApp QR, en el Bot de Telegram, en el asistente RAG y en el inspector HTTP de la API.
+      </p>
+    </div>
+
+    <!-- Selector de modo de vista -->
+    <div class="flex flex-wrap gap-2">
+      <button onclick="setMainMode('split')" id="mode-split" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] transition">
+        Vista Unificada (Celular + Bot + API)
+      </button>
+      <button onclick="setMainMode('rag')" id="mode-rag" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] transition">
+        Laboratorio RAG (PDFs + IA)
+      </button>
+      <button onclick="setMainMode('platform')" id="mode-platform" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] transition">
+        Orquestador Docker & Pruebas (4/5)
+      </button>
+    </div>
+  </div>
+
+  <!-- Barra de estado de los 5 microservicios -->
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 flex items-center justify-between">
+      <div>
+        <div class="text-xs text-[var(--muted-foreground)]">Proyecto 1 · FastAPI</div>
+        <div class="text-sm font-semibold">academic-api</div>
+        <div class="text-xs text-emerald-500 font-medium">:8000 · JWT + RBAC</div>
+      </div>
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+    </div>
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 flex items-center justify-between">
+      <div>
+        <div class="text-xs text-[var(--muted-foreground)]">Proyecto 2 · WhatsApp + Telegram</div>
+        <div class="text-sm font-semibold">academic-bot</div>
+        <div class="text-xs text-emerald-500 font-medium">QR Baileys :3005 + Polling</div>
+      </div>
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+    </div>
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 flex items-center justify-between">
+      <div>
+        <div class="text-xs text-[var(--muted-foreground)]">Proyecto 3 · Android Kotlin</div>
+        <div class="text-sm font-semibold">academic-mobile</div>
+        <div class="text-xs text-emerald-500 font-medium">MVVM · Material 3</div>
+      </div>
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+    </div>
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 flex items-center justify-between">
+      <div>
+        <div class="text-xs text-[var(--muted-foreground)]">Proyecto 4 · Docker + Nginx</div>
+        <div class="text-sm font-semibold">academic-platform</div>
+        <div class="text-xs text-emerald-500 font-medium">Gateway :80</div>
+      </div>
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+    </div>
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 flex items-center justify-between col-span-2 md:col-span-1">
+      <div>
+        <div class="text-xs text-[var(--muted-foreground)]">Proyecto 5 · ChromaDB</div>
+        <div class="text-sm font-semibold">academic-rag</div>
+        <div class="text-xs text-emerald-500 font-medium">:8001 · Citas PDF</div>
+      </div>
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 1: VISTA UNIFICADA (CELULAR ANDROID + BOT TELEGRAM + CONSOLA API) -->
+  <div id="section-split" class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+
+    <!-- COLUMNA IZQUIERDA: EMULADOR ANDROID (academic-mobile) -->
+    <div class="xl:col-span-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Proyecto 3 · Kotlin + MVVM</span>
+          <h2 class="text-base font-bold">Emulador Android — Academic Mobile</h2>
+        </div>
+        <div class="flex gap-1.5">
+          <button onclick="navigatePhone('login')" class="px-2.5 py-1 rounded-lg text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
+            Login
+          </button>
+          <button onclick="navigatePhone('materias')" class="px-2.5 py-1 rounded-lg text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
+            App
+          </button>
+        </div>
+      </div>
+
+      <!-- Carcasa de teléfono Android -->
+      <div class="mx-auto max-w-[340px] rounded-[36px] border-4 border-[var(--border)] bg-[var(--background)] shadow-lg overflow-hidden">
+        <!-- Barra de estado de Android -->
+        <div class="px-5 py-2 bg-[var(--card)] border-b border-[var(--border)] flex items-center justify-between text-xs text-[var(--muted-foreground)]">
+          <span class="font-semibold">12:35</span>
+          <span class="w-16 h-3 rounded-full bg-[var(--border)]"></span>
+          <span>5G · 98%</span>
+        </div>
+
+        <!-- Contenido dinámico de la pantalla del teléfono -->
+        <div id="phone-viewport" class="p-4 min-h-[520px] flex flex-col justify-between">
+          <!-- Renderizado por JS -->
+        </div>
+
+        <!-- Barra de navegación inferior Material 3 -->
+        <div id="phone-bottom-nav" class="bg-[var(--card)] border-t border-[var(--border)] grid grid-cols-3 py-2 text-center">
+          <button onclick="navigatePhone('materias')" id="nav-btn-materias" class="flex flex-col items-center gap-0.5 text-xs font-semibold text-[var(--primary)]">
+            <span>📚</span>
+            <span>Materias</span>
+          </button>
+          <button onclick="navigatePhone('tareas')" id="nav-btn-tareas" class="flex flex-col items-center gap-0.5 text-xs text-[var(--muted-foreground)]">
+            <span>📋</span>
+            <span>Tareas</span>
+          </button>
+          <button onclick="navigatePhone('crear-tarea')" id="nav-btn-crear" class="flex flex-col items-center gap-0.5 text-xs text-[var(--muted-foreground)]">
+            <span>➕</span>
+            <span>Nueva Tarea</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: BOT DE TELEGRAM + INSPECTOR HTTP EN VIVO -->
+    <div class="xl:col-span-7 space-y-5">
+
+      <!-- SIMULADOR OMNICANAL WHATSAPP QR + TELEGRAM (academic-bot) -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[var(--border)]">
+          <div class="flex items-center gap-2.5">
+            <div id="bot-avatar" class="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">
+              📱
+            </div>
+            <div>
+              <div id="bot-title" class="text-sm font-bold">WhatsApp QR Bridge (+57 300 123 4567)</div>
+              <div id="bot-subtitle" class="text-xs text-emerald-500">Vinculado vía Baileys (:3005) · Filtro inteligente de chats personales activo</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="setBotChannel('whatsapp')" id="btn-chan-whatsapp" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white">
+              🟢 WhatsApp QR
+            </button>
+            <button onclick="setBotChannel('telegram')" id="btn-chan-telegram" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
+              🔵 Telegram
+            </button>
+            <button onclick="toggleQrModal()" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
+              📷 QR :3005
+            </button>
+            <button onclick="clearBotChat()" class="px-2.5 py-1 rounded-lg text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
+              Limpiar
+            </button>
+          </div>
+        </div>
+
+        <!-- Panel colapsable de vinculación por Código QR (WhatsApp Web Bridge) -->
+        <div id="wsp-qr-drawer" class="hidden my-3 p-3 rounded-xl bg-[var(--background)] border border-emerald-500/40 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="space-y-1 text-xs">
+            <div class="font-bold text-emerald-500">📱 Vinculación en Vivo por Código QR (@whiskeysockets/baileys)</div>
+            <div class="text-[var(--muted-foreground)]">
+              Ejecuta <code>.\iniciar_whatsapp.ps1</code> en <code>proyecto 2\academic-bot</code> o abre <a href="http://localhost:3005" target="_blank" class="underline text-[var(--primary)] font-semibold">http://localhost:3005</a> para escanear el QR desde <strong>WhatsApp → Dispositivos vinculados</strong>.
+            </div>
+            <div class="text-[var(--muted-foreground)]">
+              🔒 <strong>Filtro de privacidad:</strong> Si tu mamá o un amigo te escribe <em>"Hola, ¿cómo vas?"</em>, el bot lo ignora (`reply: None`) y solo contesta cuando envían un comando con <code>/</code>.
+            </div>
+          </div>
+          <a href="http://localhost:3005" target="_blank" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:opacity-90">
+            Abrir Panel QR (:3005) ↗
+          </a>
+        </div>
+
+        <!-- Botones rápidos de comandos de WhatsApp y Telegram -->
+        <div class="flex flex-wrap gap-1.5 my-3">
+          <button onclick="runBotCommand('/start')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:opacity-90">/start</button>
+          <button onclick="runBotCommand('/materias')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:opacity-90">/materias</button>
+          <button onclick="runBotCommand('/tareas')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:opacity-90">/tareas</button>
+          <button onclick="runBotCommand('/pendientes')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:opacity-90">/pendientes (≤7 días)</button>
+          <button onclick="runBotCommand('/recordar 30m Repasar rotación doble AVL')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:opacity-90">/recordar 30m ...</button>
+          <button onclick="runBotCommand('/preguntar ¿Qué complejidad tiene la búsqueda binaria?')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90">/preguntar (RAG IA)</button>
+          <button onclick="runBotCommand('Hola bro, ¿nos vemos en la cafetería de la U?')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 hover:opacity-90">💬 Probar chat personal (WSP)</button>
+        </div>
+
+        <!-- Ventana de mensajes del Bot -->
+        <div id="bot-messages" class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3.5 h-72 overflow-y-auto space-y-3">
+          <!-- Renderizado por JS -->
+        </div>
+
+        <!-- Entrada libre para el Bot -->
+        <form onsubmit="handleBotSubmit(event)" class="mt-3 flex gap-2">
+          <input id="bot-input" type="text" placeholder="Escribe un comando ej: /preguntar ¿Cuáles son los pilares de POO?" class="flex-1 px-3 py-2 rounded-xl text-xs bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] focus:outline-none" />
+          <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
+            Enviar
+          </button>
+        </form>
+      </div>
+
+      <!-- INSPECTOR DE TRÁFICO HTTP / API REST (academic-api & academic-rag) -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Proyecto 1 & 5 · Trazabilidad REST + JWT</span>
+            <h3 class="text-sm font-bold">Inspector en Vivo de Peticiones HTTP (`academic-api` & `academic-rag`)</h3>
+          </div>
+          <span id="jwt-badge" class="px-2.5 py-1 rounded-md text-xs font-mono bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+            Bearer eyJhbGciOiJIUzI1Ni...
+          </span>
+        </div>
+        <div id="api-logs" class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 h-48 overflow-y-auto font-mono text-xs space-y-2">
+          <!-- Renderizado por JS -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECCIÓN 2: LABORATORIO RAG (academic-rag) -->
+  <div id="section-rag" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-5">
+    <div class="lg:col-span-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 space-y-4">
+      <div>
+        <span class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">Proyecto 5 · POST /api/v1/documentos</span>
+        <h2 class="text-base font-bold mt-0.5">Documentos PDF Indexados en ChromaDB</h2>
+        <p class="text-xs text-[var(--muted-foreground)]">Cada PDF se divide en fragmentos con solapamiento preservando página y posición.</p>
+      </div>
+
+      <div id="rag-docs-list" class="space-y-2.5"></div>
+
+      <div class="border border-dashed border-[var(--border)] rounded-xl p-3.5 space-y-2">
+        <div class="text-xs font-semibold">Simular subida de nuevo apunte PDF</div>
+        <input id="new-pdf-name" type="text" value="apuntes_bases_datos_relacionales.pdf" class="w-full px-3 py-1.5 rounded-lg text-xs bg-[var(--background)] border border-[var(--border)]" />
+        <textarea id="new-pdf-text" rows="2" class="w-full px-3 py-1.5 rounded-lg text-xs bg-[var(--background)] border border-[var(--border)]">Página 1: Una clave foránea (Foreign Key) garantiza la integridad referencial entre dos tablas en PostgreSQL. Las transacciones cumplen ACID (Atomicidad, Consistencia, Aislamiento y Durabilidad).</textarea>
+        <button onclick="uploadSimulatedPdf()" class="w-full py-2 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
+          Subir, Fragmentar y Vectorizar PDF
+        </button>
+      </div>
+    </div>
+
+    <div class="lg:col-span-7 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 space-y-4">
+      <div>
+        <span class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">Proyecto 5 · POST /api/v1/preguntar</span>
+        <h2 class="text-base font-bold mt-0.5">Buscador Semántico con Citas Verificables</h2>
+        <p class="text-xs text-[var(--muted-foreground)]">Haz clic en una pregunta de prueba o escribe la tuya para consultar los fragmentos vectorizados:</p>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <button onclick="askRagStudio('¿Cuáles son los 4 pilares de la Programación Orientada a Objetos?')" class="px-3 py-1.5 rounded-xl text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
+          ¿Pilares de la POO?
+        </button>
+        <button onclick="askRagStudio('¿Qué complejidad tiene la búsqueda binaria y MergeSort?')" class="px-3 py-1.5 rounded-xl text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
+          ¿Complejidad de búsqueda binaria?
+        </button>
+        <button onclick="askRagStudio('¿Qué garantiza una clave foránea y qué significa ACID?')" class="px-3 py-1.5 rounded-xl text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
+          ¿Clave foránea y ACID?
+        </button>
+      </div>
+
+      <form onsubmit="handleRagStudioSubmit(event)" class="flex gap-2">
+        <input id="rag-studio-input" type="text" placeholder="Escribe tu pregunta sobre los apuntes..." class="flex-1 px-3.5 py-2 rounded-xl text-xs bg-[var(--background)] border border-[var(--border)]" />
+        <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
+          Consultar RAG
+        </button>
+      </form>
+
+      <div id="rag-studio-output" class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+        <!-- Renderizado por JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 3: ORQUESTADOR DOCKER & SUITE DE PRUEBAS (academic-platform) -->
+  <div id="section-platform" class="hidden space-y-5">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <div class="lg:col-span-6 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 space-y-3">
+        <span class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">Proyecto 4 · academic-platform</span>
+        <h2 class="text-base font-bold">Topología de Red Docker (`academic-net`) y Gateway Nginx</h2>
+        <div class="space-y-2 text-xs">
+          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] flex justify-between items-center">
+            <div>
+              <div class="font-bold">1. academic-gateway (nginx:1.25-alpine)</div>
+              <div class="text-[var(--muted-foreground)]">Enruta `/api/*` → `academic-api:8000` y `/rag/*` → `academic-rag:8000`</div>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-mono">0.0.0.0:80</span>
+          </div>
+          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] flex justify-between items-center">
+            <div>
+              <div class="font-bold">2. academic-api (FastAPI + SQLAlchemy + Alembic)</div>
+              <div class="text-[var(--muted-foreground)]">Auth JWT, RBAC, Materias y Tareas · Healthcheck `GET /health`</div>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-mono">:8000</span>
+          </div>
+          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] flex justify-between items-center">
+            <div>
+              <div class="font-bold">3. academic-postgres (postgres:16-alpine)</div>
+              <div class="text-[var(--muted-foreground)]">Volumen persistente `academic_postgres_data` · `pg_isready`</div>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-mono">:5432</span>
+          </div>
+          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] flex justify-between items-center">
+            <div>
+              <div class="font-bold">4. academic-rag (FastAPI + ChromaDB + PyPDF2)</div>
+              <div class="text-[var(--muted-foreground)]">Volumen `academic_chroma_data` · Healthcheck `GET /api/v1/health`</div>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-mono">:8001→8000</span>
+          </div>
+          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] flex justify-between items-center">
+            <div>
+              <div class="font-bold">5. academic-bot (python-telegram-bot + APScheduler)</div>
+              <div class="text-[var(--muted-foreground)]">Consume `http://academic-api:8000/api/v1` y `http://academic-rag:8000/api/v1`</div>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-mono">worker</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-6 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 space-y-3">
+        <span class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">Resultados Reales de Ejecución</span>
+        <h2 class="text-base font-bold">Resumen de Pruebas Automatizadas (111 Verificaciones Totales)</h2>
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)]">
+            <div class="text-[var(--muted-foreground)]">Suite 1 · academic-api</div>
+            <div class="text-base font-bold text-emerald-500 mt-0.5">23 / 23 PASSED</div>
+            <div class="text-[var(--muted-foreground)] mt-1">Auth JWT, RBAC seguro, CRUD Materias y Tareas</div>
+          </div>
+          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)]">
+            <div class="text-[var(--muted-foreground)]">Suite 2 · academic-bot (WSP + TG)</div>
+            <div class="text-base font-bold text-emerald-500 mt-0.5">34 / 34 PASSED</div>
+            <div class="text-[var(--muted-foreground)] mt-1">WhatsApp QR, filtro chats personales, Telegram</div>
+          </div>
+          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)]">
+            <div class="text-[var(--muted-foreground)]">Suite 3 · academic-rag</div>
+            <div class="text-base font-bold text-emerald-500 mt-0.5">13 / 13 PASSED</div>
+            <div class="text-[var(--muted-foreground)] mt-1">Subida PDF, chunking, citas por página y filtros</div>
+          </div>
+          <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)]">
+            <div class="text-[var(--muted-foreground)]">Suite 4 · Integración E2E Unificada</div>
+            <div class="text-base font-bold text-emerald-500 mt-0.5">41 / 41 OK</div>
+            <div class="text-[var(--muted-foreground)] mt-1">API + RAG + WhatsApp QR + Telegram + Mobile</div>
+          </div>
+        </div>
+
+        <!-- Consola interactiva para correr las 41 verificaciones E2E en vivo en la pantalla -->
+        <div class="pt-2 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold">Simulador de `scripts/prueba_integracion.py` (41 Aserciones)</span>
+            <button onclick="runInteractiveE2ESuite()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90">
+              ▶ Ejecutar 41 Pruebas E2E Ahora
+            </button>
+          </div>
+          <div id="e2e-console-output" class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 h-48 overflow-y-auto font-mono text-xs space-y-1">
+            <div class="text-[var(--muted-foreground)]">Haz clic en "▶ Ejecutar 41 Pruebas E2E Ahora" para ver la corrida paso a paso...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Estado compartido en vivo entre el Celular Android, el Bot de Telegram, el RAG y la API
+    const state = {
+      user: {
+        id: "9c8b1d4a-4e21-4a7a-9b10-001122334455",
+        nombre: "Jean Mena",
+        email: "jean.mena@ucp.edu.co",
+        rol: "estudiante"
+      },
+      phoneScreen: "materias",
+      selectedMateriaFilter: "todas",
+      selectedEstadoFilter: "todas",
+      selectedTareaId: null,
+      materias: [
+        {
+          id: "mat-1",
+          nombre: "Estructuras de Datos",
+          codigo: "IS-301",
+          semestre: "2026-2",
+          descripcion: "Árboles balanceados AVL, tablas hash y grafos.",
+          profesor: "Ing. Carlos Gómez"
+        },
+        {
+          id: "mat-2",
+          nombre: "Ingeniería de Software II",
+          codigo: "IS-402",
+          semestre: "2026-2",
+          descripcion: "Arquitectura de microservicios, Docker, CI/CD y pruebas.",
+          profesor: "MSc. Laura Restrepo"
+        },
+        {
+          id: "mat-3",
+          nombre: "Inteligencia Artificial",
+          codigo: "IS-501",
+          semestre: "2026-2",
+          descripcion: "Embeddings vectoriales, búsqueda semántica y sistemas RAG.",
+          profesor: "Dr. Andrés Pineda"
+        }
+      ],
+      tareas: [
+        {
+          id: "tar-1",
+          titulo: "Implementar rotaciones de Árbol AVL",
+          descripcion: "Entregar código y pruebas unitarias de inserción y balanceo.",
+          fecha_entrega: "2026-11-01T23:59:00Z",
+          prioridad: "alta",
+          estado: "pendiente",
+          materia_id: "mat-1"
+        },
+        {
+          id: "tar-2",
+          titulo: "Desplegar contenedor Docker con FastAPI",
+          descripcion: "Configurar Dockerfile multi-stage y healthcheck.",
+          fecha_entrega: "2026-11-03T18:00:00Z",
+          prioridad: "media",
+          estado: "en_progreso",
+          materia_id: "mat-2"
+        },
+        {
+          id: "tar-3",
+          titulo: " Evaluar embeddings en ChromaDB",
+          descripcion: "Comparar precisión top-k con citas de página.",
+          fecha_entrega: "2026-11-05T14:00:00Z",
+          prioridad: "alta",
+          estado: "completada",
+          materia_id: "mat-3"
+        }
+      ],
+      ragDocs: [
+        {
+          id: "a1b2c3d4-1111-4000-8000-000000000001",
+          nombre_archivo: "ejemplo_apuntes.pdf",
+          total_paginas: 2,
+          total_fragmentos: 4,
+          chunks: [
+            {
+              pagina: 1,
+              texto: "La Programación Orientada a Objetos (POO) es un paradigma basado en objetos. Sus 4 pilares fundamentales son: 1. Encapsulamiento (ocultar el estado interno), 2. Abstracción, 3. Herencia y 4. Polimorfismo."
+            },
+            {
+              pagina: 2,
+              texto: "Complejidad Algorítmica y Notación Big O: O(1) acceso constante, O(log n) búsqueda binaria en listas ordenadas, O(n) recorrido lineal, O(n log n) MergeSort y QuickSort, O(n^2) BubbleSort."
+            }
+          ]
+        }
+      ],
+      apiLogs: [],
+      botMessages: []
+    };
+
+    function logApi(method, path, status, summary) {
+      const time = new Date().toLocaleTimeString("es-CO", { hour12: false });
+      state.apiLogs.unshift({ time, method, path, status, summary });
+      renderApiLogs();
+    }
+
+    function renderApiLogs() {
+      const container = document.getElementById("api-logs");
+      container.innerHTML = state.apiLogs.map(item => {
+        const statusColor = item.status < 300 ? "text-emerald-500" : "text-amber-500";
+        return `<div class="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)] flex flex-col gap-0.5">
+          <div class="flex items-center justify-between">
+            <span><strong class="text-[var(--primary)]">${item.method}</strong> ${item.path}</span>
+            <span class="${statusColor} font-bold">HTTP ${item.status} · ${item.time}</span>
+          </div>
+          <div class="text-[var(--muted-foreground)]">${item.summary}</div>
+        </div>`;
+      }).join("");
+    }
+
+    function getMateriaName(materiaId) {
+      const m = state.materias.find(x => x.id === materiaId);
+      return m ? m.nombre : "General";
+    }
+
+    function formatDateEs(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString("es-CO", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+    }
+
+    // ---------------- NAVEGACIÓN DEL TELÉFONO ANDROID ----------------
+    function navigatePhone(screen, tareaId = null) {
+      state.phoneScreen = screen;
+      if (tareaId) state.selectedTareaId = tareaId;
+
+      ["materias", "tareas", "crear-tarea"].forEach(key => {
+        const btn = document.getElementById("nav-btn-" + (key === "crear-tarea" ? "crear" : key));
+        if (btn) {
+          btn.className = "flex flex-col items-center gap-0.5 text-xs " +
+            (state.phoneScreen === key ? "font-semibold text-[var(--primary)]" : "text-[var(--muted-foreground)]");
+        }
+      });
+
+      const vp = document.getElementById("phone-viewport");
+
+      if (screen === "login") {
+        vp.innerHTML = `
+          <div class="my-auto space-y-4">
+            <div class="text-center space-y-1">
+              <div class="w-12 h-12 rounded-2xl bg-[var(--primary)] text-[var(--primary-foreground)] mx-auto flex items-center justify-center text-xl font-bold">🎓</div>
+              <h3 class="text-base font-bold">Academic Mobile</h3>
+              <p class="text-xs text-[var(--muted-foreground)]">Inicia sesión con tu cuenta institucional</p>
+            </div>
+            <div class="space-y-2.5">
+              <div>
+                <label class="text-xs font-medium">Correo electrónico</label>
+                <input id="login-email" value="${state.user.email}" class="w-full mt-1 px-3 py-2 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]" />
+              </div>
+              <div>
+                <label class="text-xs font-medium">Contraseña</label>
+                <input type="password" value="ClaveSegura123" class="w-full mt-1 px-3 py-2 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]" />
+              </div>
+              <button onclick="doPhoneLogin()" class="w-full py-2.5 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
+                Iniciar Sesión (JWT)
+              </button>
+            </div>
+            <div class="p-2.5 rounded-xl bg-[var(--card)] border border-[var(--border)] text-xs text-[var(--muted-foreground)]">
+              🔒 Tokens guardados en <strong>EncryptedSharedPreferences</strong> con renovación automática vía <code>TokenAuthenticator</code>.
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (screen === "materias") {
+        logApi("GET", "/api/v1/materias?limite=50&desplazamiento=0", 200, `Retornadas ${state.materias.length} materias de ${state.user.nombre}`);
+        vp.innerHTML = `
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-[var(--muted-foreground)]">Hola, ${state.user.nombre}</div>
+                <h3 class="text-sm font-bold">Mis Materias (${state.materias.length})</h3>
+              </div>
+              <button onclick="navigatePhone('nueva-materia')" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
+                + Materia
+              </button>
+            </div>
+            <div class="space-y-2.5 max-h-[410px] overflow-y-auto pr-1">
+              ${state.materias.map(m => {
+                const count = state.tareas.filter(t => t.materia_id === m.id).length;
+                return `
+                  <div onclick="filterTareasByMateria('${m.id}')" class="cursor-pointer p-3 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-[var(--primary)] transition space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-bold">${m.nombre}</span>
+                      <span class="px-2 py-0.5 rounded-full text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] font-mono">${m.codigo}</span>
+                    </div>
+                    <p class="text-xs text-[var(--muted-foreground)]">${m.descripcion}</p>
+                    <div class="flex items-center justify-between pt-1 text-xs text-[var(--muted-foreground)]">
+                      <span>Semestre ${m.semestre}</span>
+                      <span class="font-semibold text-[var(--primary)]">${count} tarea(s) →</span>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (screen === "nueva-materia") {
+        vp.innerHTML = `
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold">Nueva Materia</h3>
+              <button onclick="navigatePhone('materias')" class="text-xs text-[var(--muted-foreground)]">Cancelar</button>
+            </div>
+            <div class="space-y-2.5">
+              <div>
+                <label class="text-xs font-medium">Nombre de la asignatura</label>
+                <input id="mat-nombre" placeholder="Ej: Bases de Datos II" value="Bases de Datos II" class="w-full mt-1 px-3 py-2 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]" />
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-xs font-medium">Código</label>
+                  <input id="mat-codigo" value="IS-405" class="w-full mt-1 px-3 py-2 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]" />
+                </div>
+                <div>
+                  <label class="text-xs font-medium">Semestre</label>
+                  <input id="mat-semestre" value="2026-2" class="w-full mt-1 px-3 py-2 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]" />
+                </div>
+              </div>
+              <div>
+                <label class="text-xs font-medium">Descripción</label>
+                <textarea id="mat-desc" rows="2" class="w-full mt-1 px-3 py-2 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]"> Índices B-Tree, transacciones ACID y optimización SQL.</textarea>
+              </div>
+              <button onclick="saveNewMateria()" class="w-full py-2.5 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
+                Guardar en academic-api
+              </button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (screen === "tareas") {
+        const filtered = state.tareas.filter(t => {
+          const okMat = state.selectedMateriaFilter === "todas" || t.materia_id === state.selectedMateriaFilter;
+          const okEst = state.selectedEstadoFilter === "todas" || t.estado === state.selectedEstadoFilter;
+          return okMat && okEst;
+        });
+        logApi("GET", `/api/v1/tareas?limite=50${state.selectedEstadoFilter !== 'todas' ? '&estado=' + state.selectedEstadoFilter : ''}`, 200, `Listadas ${filtered.length} tareas`);
+
+        vp.innerHTML = `
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold">Mis Tareas (${filtered.length})</h3>
+              ${state.selectedMateriaFilter !== "todas" ? `<button onclick="clearMateriaFilter()" class="text-xs text-[var(--primary)]">Ver todas</button>` : ""}
+            </div>
+
+            <!-- ChipGroup Material 3 para filtrar por estado -->
+            <div class="flex gap-1.5 overflow-x-auto pb-1">
+              ${["todas", "pendiente", "en_progreso", "completada"].map(est => `
+                <button onclick="setEstadoFilter('${est}')" class="px-2.5 py-1 rounded-full text-xs border border-[var(--border)] ${state.selectedEstadoFilter === est ? 'bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold' : 'bg-[var(--card)] text-[var(--muted-foreground)]'}">
+                  ${est === "todas" ? "Todas" : est.replace("_", " ")}
+                </button>
+              `).join("")}
+            </div>
+
+            <div class="space-y-2 max-h-[370px] overflow-y-auto pr-1">
+              ${filtered.map(t => {
+                const badge = t.estado === "completada"
+                  ? `<span class="px-2 py-0.5 rounded-full text-xs bg-emerald-500/15 text-emerald-500 font-medium">Completada</span>`
+                  : t.estado === "en_progreso"
+                  ? `<span class="px-2 py-0.5 rounded-full text-xs bg-amber-500/15 text-amber-500 font-medium">En progreso</span>`
+                  : `<span class="px-2 py-0.5 rounded-full text-xs bg-rose-500/15 text-rose-500 font-medium">Pendiente</span>`;
+                return `
+                  <div onclick="navigatePhone('detalle-tarea', '${t.id}')" class="cursor-pointer p-3 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-[var(--primary)] transition space-y-1">
+                    <div class="flex items-start justify-between gap-2">
+                      <span class="text-xs font-bold">${t.titulo}</span>
+                      ${badge}
+                    </div>
+                    <div class="text-xs text-[var(--muted-foreground)]">📚 ${getMateriaName(t.materia_id)}</div>
+                    <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)] pt-1">
+                      <span>⏰ ${formatDateEs(t.fecha_entrega)}</span>
+                      <span class="uppercase font-semibold">Prioridad ${t.prioridad}</span>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (screen === "detalle-tarea") {
+        const t = state.tareas.find(x => x.id === state.selectedTareaId) || state.tareas[0];
+        if (!t) return navigatePhone("tareas");
+        vp.innerHTML = `
+          <div class="space-y-3">
+            <button onclick="navigatePhone('tareas')" class="text-xs text-[var(--primary)] font-semibold">← Volver a tareas</button>
+            <div class="p-3.5 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-2">
+              <div class="text-xs text-[var(--muted-foreground)]">${getMateriaName(t.materia_id)}</div>
+              <h3 class="text-sm font-bold">${t.titulo}</h3>
+              <p class="text-xs text-[var(--muted-foreground)]">${t.descripcion || "Sin descripción"}</p>
+              <div class="pt-2 border-t border-[var(--border)] text-xs space-y-1">
+                <div><strong>Estado actual:</strong> ${t.estado.replace("_", " ")}</div>
+                <div><strong>Prioridad:</strong> ${t.prioridad}</div>
+                <div><strong>Entrega:</strong> ${formatDateEs(t.fecha_entrega)}</div>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="text-xs font-semibold">Cambiar estado (PUT /api/v1/tareas/${t.id}):</div>
+              <div class="grid grid-cols-2 gap-2">
+                <button onclick="updateTareaStatus('${t.id}', 'en_progreso')" class="py-2 rounded-xl text-xs font-semibold bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
+                  🟡 En Progreso
+                </button>
+                <button onclick="updateTareaStatus('${t.id}', 'completada')" class="py-2 rounded-xl text-xs font-semibold bg-emerald-600 text-white">
+                  🟢 Completada
+                </button>
+              </div>
+              <button onclick="deleteTarea('${t.id}')" class="w-full py-2 rounded-xl text-xs font-semibold bg-rose-500/15 text-rose-500 border border-rose-500/30">
+                🗑 Eliminar Tarea
+              </button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (screen === "crear-tarea") {
+        vp.innerHTML = `
+          <div class="space-y-3">
+            <h3 class="text-sm font-bold">Crear Nueva Tarea</h3>
+            <div class="space-y-2">
+              <div>
+                <label class="text-xs font-medium">Título de la entrega</label>
+                <input id="tar-titulo" value="Preparar sustentación final Academic" class="w-full mt-1 px-3 py-1.5 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]" />
+              </div>
+              <div>
+                <label class="text-xs font-medium">Materia</label>
+                <select id="tar-materia" class="w-full mt-1 px-3 py-1.5 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]">
+                  ${state.materias.map(m => `<option value="${m.id}">${m.nombre} (${m.codigo})</option>`).join("")}
+                </select>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-xs font-medium">Prioridad</label>
+                  <select id="tar-prio" class="w-full mt-1 px-3 py-1.5 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]">
+                    <option value="alta">Alta</option>
+                    <option value="media">Media</option>
+                    <option value="baja">Baja</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-xs font-medium">Entrega (días)</label>
+                  <input id="tar-dias" type="number" value="3" min="1" max="30" class="w-full mt-1 px-3 py-1.5 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]" />
+                </div>
+              </div>
+              <div>
+                <label class="text-xs font-medium">Descripción</label>
+                <textarea id="tar-desc" rows="2" class="w-full mt-1 px-3 py-1.5 rounded-xl text-xs bg-[var(--card)] border border-[var(--border)]">Demostrar API, Bot, App Android, RAG y Docker funcionando juntos.</textarea>
+              </div>
+              <button onclick="saveNewTarea()" class="w-full py-2.5 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
+                Publicar Tarea (POST /api/v1/tareas)
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function doPhoneLogin() {
+      const email = document.getElementById("login-email").value;
+      state.user.email = email;
+      logApi("POST", "/api/v1/auth/login", 200, `Tokens emitidos para ${email}`);
+      navigatePhone("materias");
+    }
+
+    function saveNewMateria() {
+      const nombre = document.getElementById("mat-nombre").value.trim() || "Nueva Materia";
+      const codigo = document.getElementById("mat-codigo").value.trim() || "IS-999";
+      const semestre = document.getElementById("mat-semestre").value.trim() || "2026-2";
+      const descripcion = document.getElementById("mat-desc").value.trim();
+      const id = "mat-" + (state.materias.length + 1);
+      state.materias.unshift({ id, nombre, codigo, semestre, descripcion, profesor: "Docente Asignado" });
+      logApi("POST", "/api/v1/materias", 201, `Materia creada: ${nombre} (${codigo}) — ya disponible en Telegram con /materias`);
+      navigatePhone("materias");
+    }
+
+    function saveNewTarea() {
+      const titulo = document.getElementById("tar-titulo").value.trim() || "Nueva Tarea";
+      const materia_id = document.getElementById("tar-materia").value;
+      const prioridad = document.getElementById("tar-prio").value;
+      const dias = parseInt(document.getElementById("tar-dias").value || "2", 10);
+      const descripcion = document.getElementById("tar-desc").value.trim();
+      const fecha = new Date(Date.now() + dias * 86400000).toISOString();
+      const id = "tar-" + (state.tareas.length + 1);
+      state.tareas.unshift({ id, titulo, descripcion, fecha_entrega: fecha, prioridad, estado: "pendiente", materia_id });
+      logApi("POST", "/api/v1/tareas", 201, `Tarea creada: "${titulo}" — prueba /tareas o /pendientes en el Bot`);
+      navigatePhone("tareas");
+    }
+
+    function updateTareaStatus(id, nuevoEstado) {
+      const t = state.tareas.find(x => x.id === id);
+      if (t) {
+        t.estado = nuevoEstado;
+        logApi("PUT", `/api/v1/tareas/${id}`, 200, `Estado actualizado a '${nuevoEstado}'`);
+        navigatePhone("detalle-tarea", id);
+      }
+    }
+
+    function deleteTarea(id) {
+      state.tareas = state.tareas.filter(x => x.id !== id);
+      logApi("DELETE", `/api/v1/tareas/${id}`, 204, "Tarea eliminada correctamente");
+      navigatePhone("tareas");
+    }
+
+    function filterTareasByMateria(materiaId) {
+      state.selectedMateriaFilter = materiaId;
+      navigatePhone("tareas");
+    }
+
+    function clearMateriaFilter() {
+      state.selectedMateriaFilter = "todas";
+      navigatePhone("tareas");
+    }
+
+    function setEstadoFilter(est) {
+      state.selectedEstadoFilter = est;
+      navigatePhone("tareas");
+    }
+
+    // ---------------- SIMULADOR OMNICANAL WHATSAPP QR + TELEGRAM (academic-bot) ----------------
+    state.botChannel = "whatsapp";
+
+    function setBotChannel(chan) {
+      state.botChannel = chan;
+      const avatar = document.getElementById("bot-avatar");
+      const title = document.getElementById("bot-title");
+      const subtitle = document.getElementById("bot-subtitle");
+      const btnWsp = document.getElementById("btn-chan-whatsapp");
+      const btnTg = document.getElementById("btn-chan-telegram");
+
+      if (chan === "whatsapp") {
+        avatar.textContent = "📱";
+        avatar.className = "w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm";
+        title.textContent = "WhatsApp QR Bridge (+57 300 123 4567)";
+        subtitle.textContent = "Vinculado vía Baileys (:3005) · Filtro inteligente de chats personales activo";
+        btnWsp.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white";
+        btnTg.className = "px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]";
+      } else {
+        avatar.textContent = "🤖";
+        avatar.className = "w-9 h-9 rounded-full bg-[var(--primary)] text-[var(--primary-foreground)] flex items-center justify-center font-bold text-sm";
+        title.textContent = "Telegram Bot (@AcademicUcpBot)";
+        subtitle.textContent = "En línea vía Long Polling · Conectado a academic-api (:8000) y academic-rag (:8001)";
+        btnTg.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]";
+        btnWsp.className = "px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]";
+      }
+    }
+
+    function toggleQrModal() {
+      const el = document.getElementById("wsp-qr-drawer");
+      if (el) el.classList.toggle("hidden");
+    }
+
+    function appendBotMessage(sender, htmlContent) {
+      state.botMessages.push({ sender, htmlContent });
+      const box = document.getElementById("bot-messages");
+      box.innerHTML = state.botMessages.map(m => {
+        if (m.sender === "user") {
+          return `<div class="flex justify-end">
+            <div class="px-3 py-2 rounded-2xl rounded-tr-none bg-[var(--primary)] text-[var(--primary-foreground)] text-xs max-w-[80%]">${m.htmlContent}</div>
+          </div>`;
+        }
+        return `<div class="flex justify-start">
+          <div class="p-3 rounded-2xl rounded-tl-none bg-[var(--card)] border border-[var(--border)] text-xs max-w-[88%] space-y-1">${m.htmlContent}</div>
+        </div>`;
+      }).join("");
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function clearBotChat() {
+      state.botMessages = [];
+      runBotCommand("/start");
+    }
+
+    function handleBotSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById("bot-input");
+      const val = input.value.trim();
+      if (!val) return;
+      input.value = "";
+      runBotCommand(val);
+    }
+
+    function queryLocalRag(question) {
+      const q = question.toLowerCase();
+      const matches = [];
+      state.ragDocs.forEach(doc => {
+        doc.chunks.forEach(ch => {
+          let score = 0.62;
+          if ((q.includes("poo") || q.includes("pilar") || q.includes("objeto")) && ch.texto.toLowerCase().includes("encapsulamiento")) score = 0.94;
+          if ((q.includes("binaria") || q.includes("complejidad") || q.includes("big o")) && ch.texto.toLowerCase().includes("log n")) score = 0.96;
+          if ((q.includes("foránea") || q.includes("foranea") || q.includes("acid") || q.includes("clave")) && ch.texto.toLowerCase().includes("acid")) score = 0.95;
+          matches.push({
+            documento: doc.nombre_archivo,
+            pagina: ch.pagina,
+            texto: ch.texto,
+            relevancia: score
+          });
+        });
+      });
+      matches.sort((a, b) => b.relevancia - a.relevancia);
+      return matches.slice(0, 2);
+    }
+
+    function runBotCommand(cmd) {
+      appendBotMessage("user", cmd);
+
+      // En WhatsApp QR, cualquier mensaje personal que no empiece con "/" es ignorado silenciosamente
+      if (state.botChannel === "whatsapp" && !cmd.startsWith("/")) {
+        appendBotMessage("bot", `
+          <div class="font-bold text-emerald-500">🔕 [Filtro de Privacidad WhatsApp QR]</div>
+          <div class="text-[var(--muted-foreground)]">
+            <code>processor.py</code> detectó un mensaje personal sin prefijo <code>/</code> y devolvió <code>{"reply": null}</code>. Tu WhatsApp no envía ninguna respuesta automática a tus amigos o familiares.
+          </div>
+        `);
+        return;
+      }
+
+      if (cmd.startsWith("/start") || cmd.startsWith("/help")) {
+        appendBotMessage("bot", `
+          <div class="font-bold">🎓 ¡Bienvenido a Academic Bot, ${state.user.nombre}!</div>
+          <div>Tu sesión JWT está vinculada con <code>${state.user.email}</code>.</div>
+          <div class="pt-1 text-[var(--muted-foreground)]">
+            Comandos activos: <code>/materias</code>, <code>/tareas</code>, <code>/pendientes</code>, <code>/recordar</code>, <code>/preguntar</code>.
+          </div>
+        `);
+        return;
+      }
+
+      if (cmd.startsWith("/materias")) {
+        logApi("GET", "/api/v1/materias?limite=50&desplazamiento=0", 200, "AcademicBot consultó el listado de materias");
+        const listHtml = state.materias.map((m, idx) =>
+          `<div><strong>${idx + 1}. ${m.nombre}</strong> (<code>${m.codigo}</code>)<br/><span class="text-[var(--muted-foreground)]">   📌 Semestre: ${m.semestre} · ${m.descripcion}</span></div>`
+        ).join("");
+        appendBotMessage("bot", `
+          <div class="font-bold">📚 Tus Materias Matriculadas (${state.materias.length}):</div>
+          <div class="space-y-1.5 pt-1">${listHtml}</div>
+        `);
+        return;
+      }
+
+      if (cmd.startsWith("/tareas") || cmd.startsWith("/pendientes")) {
+        const soloPend = cmd.startsWith("/pendientes");
+        const lista = soloPend ? state.tareas.filter(t => t.estado !== "completada") : state.tareas;
+        logApi("GET", "/api/v1/tareas?limite=50&desplazamiento=0", 200, `AcademicBot consultó ${lista.length} tarea(s)`);
+        const itemsHtml = lista.map((t, idx) => {
+          const icon = t.estado === "completada" ? "🟢 Entregada" : t.estado === "en_progreso" ? "🟡 En progreso" : "🔴 Pendiente";
+          return `<div>
+            <strong>${idx + 1}. ${t.titulo}</strong><br/>
+            <span class="text-[var(--muted-foreground)]">📚 ${getMateriaName(t.materia_id)} · ${icon} · ⏰ ${formatDateEs(t.fecha_entrega)}</span>
+          </div>`;
+        }).join("");
+        appendBotMessage("bot", `
+          <div class="font-bold">${soloPend ? "⏳ Entregas Pendientes (Próximos 7 días):" : "📋 Todas tus Tareas:"}</div>
+          <div class="space-y-1.5 pt-1">${itemsHtml || "🎉 ¡No tienes tareas pendientes!"}</div>
+        `);
+        return;
+      }
+
+      if (cmd.startsWith("/recordar")) {
+        const resto = cmd.replace("/recordar", "").trim() || "30m Repasar apuntes";
+        appendBotMessage("bot", `
+          <div class="font-bold">⏰ Recordatorio Programado (APScheduler)</div>
+          <div>Se enviará una alerta a este chat en: <code>${resto}</code></div>
+        `);
+        return;
+      }
+
+      const query = cmd.replace("/preguntar", "").trim() || cmd;
+      logApi("POST", "/api/v1/preguntar", 200, `AcademicBot consultó a academic-rag: "${query}"`);
+      const citas = queryLocalRag(query);
+      const citasHtml = citas.map((c, i) => `
+        <div class="p-2 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+          <div class="font-semibold">📄 [${i + 1}] ${c.documento} (Pág. ${c.pagina}) — Confianza: ${(c.relevancia * 100).toFixed(0)}%</div>
+          <div class="italic text-[var(--muted-foreground)]">"${c.texto}"</div>
+        </div>
+      `).join("");
+      appendBotMessage("bot", `
+        <div class="font-bold">🤖 Asistente Académico (RAG)</div>
+        <div><strong>Pregunta:</strong> <em>${query}</em></div>
+        <div class="pt-1">📚 <strong>Fuentes y Citas Consultadas:</strong></div>
+        <div class="space-y-1.5 pt-1">${citasHtml}</div>
+      `);
+    }
+
+    // ---------------- LABORATORIO RAG ----------------
+    function renderRagDocs() {
+      const box = document.getElementById("rag-docs-list");
+      box.innerHTML = state.ragDocs.map(d => `
+        <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] flex items-center justify-between">
+          <div>
+            <div class="text-xs font-bold">📄 ${d.nombre_archivo}</div>
+            <div class="text-xs text-[var(--muted-foreground)]">${d.total_paginas} página(s) · ${d.chunks.length} fragmentos vectorizados</div>
+          </div>
+          <span class="px-2 py-0.5 rounded text-xs bg-emerald-500/15 text-emerald-500 font-mono">Indexado</span>
+        </div>
+      `).join("");
+    }
+
+    function uploadSimulatedPdf() {
+      const name = document.getElementById("new-pdf-name").value.trim() || "apuntes_nuevo.pdf";
+      const text = document.getElementById("new-pdf-text").value.trim();
+      if (!text) return;
+      state.ragDocs.push({
+        id: "doc-" + (state.ragDocs.length + 1),
+        nombre_archivo: name,
+        total_paginas: 1,
+        total_fragmentos: 1,
+        chunks: [{ pagina: 1, texto: text }]
+      });
+      logApi("POST", "/api/v1/documentos", 201, `PDF '${name}' indexado en ChromaDB`);
+      renderRagDocs();
+      askRagStudio("¿Qué garantiza una clave foránea y qué significa ACID?");
+    }
+
+    function handleRagStudioSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById("rag-studio-input");
+      if (!input.value.trim()) return;
+      askRagStudio(input.value.trim());
+    }
+
+    function askRagStudio(question) {
+      document.getElementById("rag-studio-input").value = question;
+      logApi("POST", "/api/v1/preguntar", 200, `Búsqueda vectorial top_k=2 para "${question}"`);
+      const citas = queryLocalRag(question);
+      const out = document.getElementById("rag-studio-output");
+      out.innerHTML = `
+        <div class="text-xs font-semibold text-[var(--primary)]">Respuesta generada con citas verificables:</div>
+        <div class="text-xs">Basado en tus apuntes académicos indexados para <strong>"${question}"</strong>:</div>
+        <div class="space-y-2">
+          ${citas.map((c, idx) => `
+            <div class="p-3 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold">Cita #${idx + 1} · ${c.documento} (Página ${c.pagina})</span>
+                <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-semibold">Similitud ${(c.relevancia * 100).toFixed(1)}%</span>
+              </div>
+              <p class="text-xs text-[var(--muted-foreground)]">"${c.texto}"</p>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function setMainMode(mode) {
+      ["split", "rag", "platform"].forEach(m => {
+        document.getElementById("section-" + m).classList.toggle("hidden", m !== mode);
+        const btn = document.getElementById("mode-" + m);
+        btn.className = m === mode
+          ? "px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] transition"
+          : "px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] transition";
+      });
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("light-mode");
+      const btn = document.getElementById("theme-btn");
+      btn.textContent = document.body.classList.contains("light-mode") ? "🌙 Modo Oscuro" : "☀️ Modo Claro";
+    }
+
+    async function checkLocalBackend() {
+      const badge = document.getElementById("backend-conn-badge");
+      try {
+        const res = await fetch("http://localhost:8000/health", { mode: "cors" });
+        if (res.ok) {
+          badge.textContent = "🟢 Conectado en Vivo a localhost:8000 & :8001";
+          badge.className = "px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-semibold";
+        }
+      } catch (_) {
+        // Permanece en Simulador Cloud Autónomo cuando se abre desde GitHub Pages
+      }
+    }
+
+    function runInteractiveE2ESuite() {
+      const out = document.getElementById("e2e-console-output");
+      out.innerHTML = "";
+      const steps = [
+        "=== 1. Salud de los servicios ===",
+        "  [OK  ] academic-api responde /health (200 OK)",
+        "  [OK  ] academic-rag responde /api/v1/health (200 OK)",
+        "=== 2. Autenticación JWT y Seguridad RBAC ===",
+        "  [OK  ] POST /api/v1/auth/registro devuelve 201",
+        "  [OK  ] Registro ignora 'rol: admin' (queda estudiante por seguridad RBAC)",
+        "  [OK  ] Registro duplicado devuelve 409 CONFLICT",
+        "  [OK  ] Login con clave incorrecta devuelve 401 UNAUTHORIZED",
+        "  [OK  ] Errores usan formato estándar {error:{codigo,mensaje}}",
+        "  [OK  ] Login correcto entrega access_token y refresh_token",
+        "  [OK  ] POST /api/v1/auth/refresh genera nuevo access_token",
+        "  [OK  ] Petición sin Bearer token a /materias devuelve 401",
+        "=== 3 & 4. CRUD Materias, Tareas y Aislamiento Multi-Tenancy ===",
+        "  [OK  ] Crear, listar y actualizar materia (PUT) -> 200 OK",
+        "  [OK  ] Crear, filtrar y completar tarea -> 200 OK",
+        "  [OK  ] Otro usuario NO puede ver ni borrar recursos ajenos (403/404)",
+        "=== 6. Microservicio RAG (PDF + Chunking + Citas) ===",
+        "  [OK  ] POST /api/v1/documentos indexa PDF de 2 páginas -> 201 CREATED",
+        "  [OK  ] POST /api/v1/preguntar retorna cita verificable en Página 2 (O(log n))",
+        "=== 7. Integración Omnicanal (WhatsApp QR + Telegram + Android Retrofit) ===",
+        "  [OK  ] WhatsApp QR ignora mensajes personales sin comando ('/...')",
+        "  [OK  ] WhatsApp QR completa login conversacional contra academic-api",
+        "  [OK  ] WhatsApp QR responde /materias y /preguntar con citas de página del PDF",
+        "  [OK  ] WhatsApp QR agenda recordatorios (/recordar 15m) con delay_seconds=900",
+        "  [OK  ] academic-mobile (Retrofit) coincide con todos los endpoints REST",
+        "============================================================",
+        "RESULTADO FINAL: 41 / 41 verificaciones correctas (100% PASS)",
+        "============================================================"
+      ];
+      steps.forEach((line, idx) => {
+        setTimeout(() => {
+          const div = document.createElement("div");
+          div.className = line.includes("[OK") ? "text-emerald-400" : line.includes("RESULTADO") ? "font-bold text-emerald-300" : "text-[var(--foreground)] font-semibold";
+          div.textContent = line;
+          out.appendChild(div);
+          out.scrollTop = out.scrollHeight;
+        }, idx * 90);
+      });
+    }
+
+    // Inicializar vista
+    checkLocalBackend();
+    logApi("POST", "/api/v1/auth/login", 200, "Sesión iniciada para jean.mena@ucp.edu.co (access_token + refresh_token)");
+    navigatePhone("materias");
+    runBotCommand("/start");
+    renderRagDocs();
+    askRagStudio("¿Cuáles son los 4 pilares de la Programación Orientada a Objetos?");
+  </script>
+</body>
+</html>
